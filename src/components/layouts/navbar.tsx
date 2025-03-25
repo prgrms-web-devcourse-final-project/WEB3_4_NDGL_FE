@@ -1,6 +1,5 @@
 import { LINKS } from '@/constants/links';
 import Link from 'next/link';
-import { LogoIcon } from '../ui/icons';
 import { navbarItems, NavbarItemsType } from '@/constants/navbar';
 import { Search } from '../common/search';
 import { Button } from '../ui/button';
@@ -11,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { Logo } from './logo';
 
 export const Navbar = () => {
   const renderNavbarLinks = (item: NavbarItemsType) => {
@@ -46,10 +46,7 @@ export const Navbar = () => {
 
   return (
     <nav className="flex w-full items-center justify-between px-10 py-6">
-      <Link href={LINKS.HOME} className="flex items-center gap-2.5">
-        <LogoIcon className="size-6" pathClassName="fill-foreground" />
-        <h1 className="text-sm font-extrabold">어디 갔대?</h1>
-      </Link>
+      <Logo />
       <div className="flex items-center gap-6">
         {false ? (
           <Link href={LINKS.SIGN_IN}>

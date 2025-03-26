@@ -7,7 +7,7 @@ export const BestPosts = () => {
       <h2 className="text-2xl font-extrabold">실시간 인기</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {DUMMY_POSTS.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.id} post={post} dir="col" />
         ))}
       </div>
     </section>

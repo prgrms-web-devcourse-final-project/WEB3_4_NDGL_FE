@@ -3,7 +3,7 @@ import { BestPosts } from '@/components/home/best-posts';
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col gap-6 px-10">
+    <main className="flex flex-col gap-6 px-10 py-4">
       <BestPosts />
       <AllPosts />
     </main>

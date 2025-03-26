@@ -55,7 +55,7 @@ export const Navbar = () => {
             </Button>
           </Link>
         ) : (
-          <ul className="flex items-center gap-4 text-sm font-medium text-gray-800">
+          <ul className="flex items-center gap-4 text-sm font-medium text-gray-800 dark:text-gray-300">
             {navbarItems.map((item) => (
               <li key={item.id}>{renderNavbarLinks(item)}</li>
             ))}

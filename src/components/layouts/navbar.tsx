@@ -1,4 +1,3 @@
-import { LINKS } from '@/constants/links';
 import Link from 'next/link';
 import { navbarItems, NavbarItemsType } from '@/constants/navbar';
 import { Search } from '../common/search';
@@ -11,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Logo } from './logo';
+import { MobileNavbar } from './mobile-navbar';
 
 export const Navbar = () => {
   const renderNavbarLinks = (item: NavbarItemsType) => {
@@ -45,27 +45,20 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="flex w-full items-center justify-between px-10 py-6">
+    <nav className="flex w-full items-center justify-between px-6 py-6 md:px-10">
       <Logo />
-      <div className="flex items-center gap-6">
-        {false ? (
-          <Link href={LINKS.SIGN_IN}>
-            <Button variant="ghost" className="cursor-pointer font-semibold">
-              로그인
-            </Button>
-          </Link>
-        ) : (
-          <ul className="flex items-center gap-4 text-sm font-medium text-gray-800 dark:text-gray-300">
-            {navbarItems.map((item) => (
-              <li key={item.id}>{renderNavbarLinks(item)}</li>
-            ))}
-          </ul>
-        )}
+      <div className="hidden items-center gap-6 md:flex">
+        <ul className="flex items-center gap-4 text-sm font-medium text-gray-800 dark:text-gray-300">
+          {navbarItems.map((item) => (
+            <li key={item.id}>{renderNavbarLinks(item)}</li>
+          ))}
+        </ul>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Search />
         </div>
       </div>
+      <MobileNavbar />
     </nav>
   );
 };

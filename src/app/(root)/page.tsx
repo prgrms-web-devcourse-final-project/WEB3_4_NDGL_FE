@@ -15,7 +15,9 @@ export default function HomePage() {
         <h2 className="relative mb-8 inline-block text-3xl font-extrabold after:absolute after:-bottom-1 after:left-0 after:h-1 after:w-2/3 after:rounded after:bg-gradient-to-r after:from-blue-400 after:to-indigo-600 dark:after:from-blue-500 dark:after:to-indigo-400">
           실시간 인기 글
         </h2>
-        <Carousel slides={slides} />
+        <div className="h-full overflow-hidden pb-20">
+          <Carousel slides={slides} />
+        </div>
       </section>
       <section>
         <h2 className="relative mb-8 inline-block text-3xl font-extrabold after:absolute after:-bottom-1 after:left-0 after:h-1 after:w-2/3 after:rounded after:bg-gradient-to-r after:from-blue-400 after:to-indigo-600 dark:after:from-blue-500 dark:after:to-indigo-400">

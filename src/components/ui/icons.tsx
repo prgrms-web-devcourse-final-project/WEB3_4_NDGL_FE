@@ -48,7 +48,7 @@ export const LogoIcon = ({ pathClassName, ...rest }: IconProps) => {
   );
 };
 
-export const GoogleIcon = ({ ...rest }: IconProps) => {
+export const GoogleIcon = ({ pathClassName, ...rest }: IconProps) => {
   return (
     <svg
       viewBox="0 0 20 20"
@@ -77,7 +77,7 @@ export const GoogleIcon = ({ ...rest }: IconProps) => {
           <g
             id="Dribbble-Light-Preview"
             transform="translate(-300.000000, -7399.000000)"
-            fill="#000000"
+            className={pathClassName}
           >
             {' '}
             <g id="icons" transform="translate(56.000000, 160.000000)">

@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils';
 import { AnimInput } from '../ui/anim-input';
 import { AnimLabel } from '../ui/anim-label';
 import { Button } from '../ui/button';
-import { GoogleIcon } from '../ui/icons';
 import { BottomGradient } from '../ui/bottom-gradient';
 
 export const AuthForm = () => {

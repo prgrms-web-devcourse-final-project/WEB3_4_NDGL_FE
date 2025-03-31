@@ -1,6 +1,4 @@
-import { BottomGradient } from '@/components/ui/bottom-gradient';
-import { Button } from '@/components/ui/button';
-import { GoogleIcon } from '@/components/ui/icons';
+import { GoogleLogin } from '@/components/auth/google-login';
 
 export default function SignInPage() {
   return (
@@ -12,18 +10,7 @@ export default function SignInPage() {
         미디어에 나온 유명 장소 정보 공유 플랫폼
       </p>
       <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-      <div className="flex flex-col space-y-4">
-        <Button
-          variant="outline"
-          className="flex cursor-pointer items-center gap-4"
-        >
-          <GoogleIcon pathClassName="fill-foreground" />
-          <span className="text-sm text-neutral-700 dark:text-neutral-300">
-            Google Login
-          </span>
-          <BottomGradient />
-        </Button>
-      </div>
+      <GoogleLogin />
     </div>
   );
 }

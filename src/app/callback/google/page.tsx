@@ -1,19 +1,13 @@
-import { googleLoginProcess } from '@/services/auth.service';
-import { redirect } from 'next/navigation';
+import { AuthForm } from '@/components/auth/auth-form';
+import { googleLoginApi } from '@/services/auth.service';
 
-type SearchParams = Promise<{ [key: string]: string | undefined }>;
+type SearchParamsType = Promise<{ [key: string]: string | undefined }>;
 
-export default async function CallbackPage(props: {
-  searchParams: SearchParams;
+export default async function GoogleLogin(props: {
+  searchParams: SearchParamsType;
 }) {
   const searchParams = await props.searchParams;
   const code = searchParams.code;
 
-  const { success } = await googleLoginProcess(code);
-  // const { success } = await googleLogin();
-  if (success) {
-    redirect('/');
-  }
-
-  return <div>로그인 처리 중...</div>;
+  return <AuthForm code={code} />;
 }

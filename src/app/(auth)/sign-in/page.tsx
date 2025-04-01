@@ -2,7 +2,7 @@ import { GoogleLogin } from '@/components/auth/google-login';
 
 export default function SignInPage() {
   return (
-    <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
+    <div className="shadow-input w-full max-w-md rounded-none bg-white p-4 md:mx-auto md:rounded-2xl md:p-8 dark:bg-black">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to 어디갔대?
       </h2>

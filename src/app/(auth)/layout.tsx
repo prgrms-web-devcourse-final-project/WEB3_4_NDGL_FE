@@ -8,7 +8,7 @@ export default function AuthLayout({
   return (
     <div className="h-screen w-full overflow-hidden">
       <AuthNavbar />
-      <main className="flex h-full items-center justify-center">
+      <main className="flex h-full items-start justify-center max-sm:px-4 max-sm:pt-8 md:items-center">
         {children}
       </main>
     </div>

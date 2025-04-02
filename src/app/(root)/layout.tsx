@@ -1,16 +1,14 @@
-import { Banner } from '@/components/home/banner';
 import { FloatingButton } from '@/components/layouts/floating-button';
 import { Navbar } from '@/components/layouts/navbar';
 
-type HomeLayoutProps = {
+type MainLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function HomeLayout({ children }: HomeLayoutProps) {
+export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <>
       <Navbar />
-      <Banner />
       {children}
       <FloatingButton />
     </>

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/providers/theme.provider';
 import { ReactQueryProvider } from '@/providers/react-query.provider';
 import { Toaster } from 'sonner';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,11 @@ export default function RootLayout({
       <body
         className={cn(geistSans.variable, geistMono.variable, 'antialiased')}
       >
+        <Script
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_MAP_KEY}&libraries=services&autoload=false`}
+          strategy="beforeInteractive"
+        />
+
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"

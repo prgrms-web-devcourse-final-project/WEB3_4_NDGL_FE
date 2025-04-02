@@ -42,7 +42,6 @@ import {
   ListIcon,
   ListOrderedIcon,
   QuoteIcon,
-  HeadingIcon,
   UnderlineIcon,
   StrikethroughIcon,
   CodeIcon,
@@ -51,8 +50,17 @@ import { cn } from '@/lib/utils';
 import TextStyle from '@tiptap/extension-text-style';
 import { Level } from '@tiptap/extension-heading';
 
+const fontSizeMap: { [key: string]: string } = {
+  '1': '가장 큼',
+  '2': '큼',
+  '3': '보통',
+  '4': '작음',
+  '5': '가장 작음',
+};
+
 export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Bold,
@@ -162,20 +170,6 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('heading', { level: 2 }) &&
-              'bg-gray-300 dark:bg-gray-600',
-          )}
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-        >
-          <HeadingIcon />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className={cn(
             editor.isActive('bulletList') && 'bg-gray-300 dark:bg-gray-600',
           )}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -236,7 +230,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           <SelectContent>
             {['1', '2', '3', '4', '5'].map((size) => (
               <SelectItem key={size} value={size}>
-                {size}
+                {fontSizeMap[size]}
               </SelectItem>
             ))}
           </SelectContent>

@@ -34,7 +34,12 @@ export const googleLogin = async (
   try {
     const response = await axiosInstance.get<APIResponse<GoogleLoginResponse>>(
       '/users/google/login/process',
-      { params: { code } },
+      {
+        params: {
+          code,
+          redirect_uri: `${process.env.NEXT_PUBLIC_CLIENT_URI}/callback/google`,
+        },
+      },
     );
 
     if (!response.data?.data) {

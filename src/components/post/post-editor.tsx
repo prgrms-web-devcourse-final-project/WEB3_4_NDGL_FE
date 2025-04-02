@@ -14,13 +14,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { useRouter } from 'next/navigation';
 import { postSchema, PostSchemaType } from '@/schemas/post.schema';
 import { Editor } from './editor';
 
 export const PostEditor = () => {
-  const router = useRouter();
-
   const form = useForm<PostSchemaType>({
     resolver: zodResolver(postSchema),
     defaultValues: {

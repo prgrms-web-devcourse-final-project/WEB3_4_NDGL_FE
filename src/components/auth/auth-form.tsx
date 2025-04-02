@@ -17,7 +17,7 @@ import { Button } from '../ui/button';
 import { BottomGradient } from '../ui/bottom-gradient';
 import { googleLoginApi, signup } from '@/services/auth.service';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { GoogleLoginResponse, SignUpPayload } from '@/types/auth.type';
+import { SignUpPayload } from '@/types/auth.type';
 import { useRouter } from 'next/navigation';
 import { LINKS } from '@/constants/links';
 import { useEffect } from 'react';
@@ -71,7 +71,7 @@ export const AuthForm = ({ code }: AuthFormProps) => {
       toast.success('로그인 되었습니다.');
       router.replace(LINKS.HOME);
     }
-  }, [data?.code]);
+  }, [data?.code, router, isSuccess]);
 
   return (
     <div className="shadow-input mx-auto mt-4 w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">

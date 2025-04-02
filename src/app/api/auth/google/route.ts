@@ -32,9 +32,10 @@ export async function GET(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error(error);
     return NextResponse.json(
-      { success: false, message: error.message },
+      { success: false, message: '로그인 실패' },
       { status: 400 },
     );
   }

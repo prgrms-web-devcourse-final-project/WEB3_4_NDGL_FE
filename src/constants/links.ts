@@ -4,4 +4,5 @@ export const LINKS = {
   PROFILE: '/profile',
   SIGN_IN: '/sign-in',
   POST: (slug: string) => `/post/${slug}`,
+  CREATE: '/post/create',
 };

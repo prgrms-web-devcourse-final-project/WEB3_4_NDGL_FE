@@ -32,15 +32,14 @@ export const googleLogin = async (
   }
 
   try {
-    const response = await axiosInstance.get<APIResponse<GoogleLoginResponse>>(
-      '/users/google/login/process',
-      {
-        params: {
-          code,
-          redirect_uri: `${process.env.NEXT_PUBLIC_CLIENT_URI}/callback/google`,
-        },
+    const response = await axiosInstance.get<
+      APIResponse<{ data: GoogleLoginResponse }>
+    >('/users/google/login/process', {
+      params: {
+        code,
+        redirect_uri: `${process.env.NEXT_PUBLIC_CLIENT_URI}/callback/google`,
       },
-    );
+    });
 
     if (!response.data?.data) {
       throw new Error(response.data?.message || '로그인에 실패했습니다.');

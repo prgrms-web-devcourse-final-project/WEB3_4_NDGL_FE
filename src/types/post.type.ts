@@ -8,3 +8,19 @@ export type PostType = {
   commentCount: number;
   createdAt: string;
 };
+
+export type CreatePostPayload = {
+  title: string;
+  content: string;
+  hashtags: string[];
+  locations: LocationType[];
+  thumbnail: string;
+};
+
+export type LocationType = {
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  sequence: number;
+};

@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { LocationSearch } from './location-search';
+import { useLocationStore } from '@/store/useLocationStore';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 
 declare global {
   interface Window {
@@ -9,19 +13,12 @@ declare global {
   }
 }
 
-interface SelectedPlace {
-  address: string;
-  latitude: number;
-  longitude: number;
-}
-
 export const LocationSelector = () => {
+  const { locations, addLocation, clearLocations } = useLocationStore();
+
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [marker, setMarker] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(
-    null,
-  );
+  const [map, setMap] = useState<any>(null);
+  const [markers, setMarkers] = useState<any[]>([]);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -39,26 +36,40 @@ export const LocationSelector = () => {
     });
   }, []);
 
-  const handlePlaceSelect = (
-    place: any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
-  ) => {
-    if (!map) return;
+  useEffect(() => {
+    if (!map || !locations) return;
 
-    const position = new window.kakao.maps.LatLng(place.y, place.x);
-    map.setCenter(position);
+    markers.forEach((marker) => marker.setMap(null));
 
-    if (marker) marker.setMap(null);
-
-    const newMarker = new window.kakao.maps.Marker({
-      position,
-      map,
+    const newMarkers = locations.map((place) => {
+      const position = new window.kakao.maps.LatLng(
+        place.latitude,
+        place.longitude,
+      );
+      const marker = new window.kakao.maps.Marker({
+        position,
+        map,
+      });
+      return marker;
     });
 
-    setMarker(newMarker);
-    setSelectedPlace({
+    if (locations.length) {
+      const lastPlace = locations[locations.length - 1];
+      map.setCenter(
+        new window.kakao.maps.LatLng(lastPlace.latitude, lastPlace.longitude),
+      );
+    }
+
+    setMarkers(newMarkers);
+  }, [locations, map]);
+
+  const handlePlaceSelect = (place: any) => {
+    addLocation({
       address: place.address_name,
+      name: place.place_name,
       latitude: Number(place.y),
       longitude: Number(place.x),
+      sequence: locations.length,
     });
   };
 
@@ -68,7 +79,7 @@ export const LocationSelector = () => {
 
       <div
         ref={mapRef}
-        className={`h-[300px] w-full overflow-hidden rounded-lg border bg-gray-100 shadow dark:bg-gray-700`}
+        className="h-[300px] w-full overflow-hidden rounded-lg border bg-gray-100 shadow dark:bg-gray-700"
       >
         {!isMapLoaded && (
           <div className="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-300">
@@ -77,12 +88,35 @@ export const LocationSelector = () => {
         )}
       </div>
 
-      {selectedPlace && (
-        <div className="rounded bg-blue-50 p-3 text-sm shadow dark:bg-gray-800">
-          📍 <span className="font-semibold">선택한 위치:</span>{' '}
-          {selectedPlace.address}
-        </div>
-      )}
+      <AnimatePresence>
+        {locations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="rounded bg-blue-50 p-3 shadow dark:bg-gray-800"
+          >
+            <div className="flex items-center justify-between">
+              <div className="font-semibold">
+                📍 선택된 위치들 ({locations.length})
+              </div>
+              <Button size="icon" variant="ghost" onClick={clearLocations}>
+                <X className="size-4" />
+              </Button>
+            </div>
+            <ul className="mt-2 space-y-1 text-sm">
+              {locations.map((place) => (
+                <li
+                  key={place.sequence}
+                  className="text-gray-700 dark:text-gray-300"
+                >
+                  {place.name} - {place.address}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

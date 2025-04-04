@@ -13,24 +13,38 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { postSchema, PostSchemaType } from '@/schemas/post.schema';
 import { Editor } from './editor';
+import { useLocationStore } from '@/store/useLocationStore';
+import { useMutation } from '@tanstack/react-query';
+import { createPost } from '@/services/post.service';
+import { CreatePostPayload } from '@/types/post.type';
+import { toast } from 'sonner';
 
 export const PostEditor = () => {
+  const { locations } = useLocationStore();
+
   const form = useForm<PostSchemaType>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       title: '',
       content: '',
-      hashtags: undefined,
-      locations: '',
+      hashtags: [''],
       thumbnail: '',
     },
   });
 
+  const { mutate: create } = useMutation({
+    mutationFn: (payload: CreatePostPayload) => createPost(payload),
+  });
+
   const onSubmit = async (data: PostSchemaType) => {
-    console.log(data);
+    if (locations.length === 0) {
+      toast.error('장소를 선택해주세요.');
+      return;
+    }
+
+    create({ ...data, locations });
   };
 
   return (
@@ -77,23 +91,6 @@ export const PostEditor = () => {
                   <FormLabel>해시태그 (쉼표로 구분)</FormLabel>
                   <FormControl>
                     <Input placeholder="태그1, 태그2, 태그3" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="locations"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>장소</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="장소 데이터를 입력하세요"
-                      {...field}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

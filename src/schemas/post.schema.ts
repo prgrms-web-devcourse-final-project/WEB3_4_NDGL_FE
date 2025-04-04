@@ -6,7 +6,6 @@ export const postSchema = z.object({
   hashtags: z
     .string()
     .transform((val) => val.split(',').map((name) => name.trim())),
-  locations: z.string().optional(),
   thumbnail: z.string().url('유효한 URL을 입력해주세요.'),
 });
 export type PostSchemaType = z.infer<typeof postSchema>;

@@ -7,6 +7,7 @@ export type SignUpPayload = {
 };
 
 export type GoogleLoginResponse = {
+  code: number;
   email: string;
   identify: string;
   message: string;

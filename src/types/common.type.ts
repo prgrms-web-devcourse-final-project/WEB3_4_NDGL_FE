@@ -1,6 +1,6 @@
-export type APIResponse<T extends Record<any, unknown>> = {
-  [K in keyof T]: T[K];
-} & {
+export type APIResponse<
+  T extends Record<string, unknown> | undefined = undefined
+> = {
   message: string;
   code: number;
-};
+} & (T extends undefined ? object : T);

@@ -7,12 +7,13 @@ export type PostType = {
   likeCount: number;
   commentCount: number;
   createdAt: string;
+  hashtags: { name: string }[];
 };
 
 export type CreatePostPayload = {
   title: string;
   content: string;
-  hashtags: string[];
+  hashtags: { name: string }[];
   locations: LocationType[];
   thumbnail: string;
 };

@@ -1,77 +1,78 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from '../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { authSchema, type AuthSchemaType } from '@/schemas/auth.schema';
-import { cn } from '@/lib/utils';
-import { AnimInput } from '../ui/anim-input';
-import { AnimLabel } from '../ui/anim-label';
-import { Button } from '../ui/button';
-import { BottomGradient } from '../ui/bottom-gradient';
-import { googleLoginApi, signup } from '@/services/auth.service';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { SignUpPayload } from '@/types/auth.type';
-import { useRouter } from 'next/navigation';
-import { LINKS } from '@/constants/links';
-import { useEffect } from 'react';
-import { QUERY_KEY } from '@/lib/query-key';
-import { Loader2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle } from '../ui/card';
-import { toast } from 'sonner';
+} from "../ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { authSchema, type AuthSchemaType } from "@/schemas/auth.schema";
+import { cn } from "@/lib/utils";
+import { AnimInput } from "../ui/anim-input";
+import { AnimLabel } from "../ui/anim-label";
+import { Button } from "../ui/button";
+import { BottomGradient } from "../ui/bottom-gradient";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { SignUpPayload } from "@/types/auth.type";
+import { useLayoutEffect } from "react";
+import { QUERY_KEY } from "@/lib/query-key";
+import { Loader2 } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "../ui/card";
+import { toast } from "sonner";
+import { useNavigate, useSearchParams } from "react-router";
+import { googleLogin, signup } from "@/services/auth.service";
 
-type AuthFormProps = {
-  code?: string;
-};
+export const AuthForm = () => {
+  const [searchParams] = useSearchParams();
+  const router = useNavigate();
 
-export const AuthForm = ({ code }: AuthFormProps) => {
-  const router = useRouter();
+  const code = searchParams.get("code") ?? "";
 
   const form = useForm<AuthSchemaType>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      nickName: '',
-      blogName: '',
+      nickName: "",
+      blogName: "",
     },
   });
 
-  const { data, isLoading, isSuccess } = useQuery({
+  const {
+    data: authData,
+    isLoading,
+    isSuccess,
+  } = useQuery({
     queryKey: QUERY_KEY.AUTH.GOOGLE(code),
-    queryFn: () => googleLoginApi(code),
+    queryFn: () => googleLogin(code),
     enabled: !!code,
-    select: (res) => {
-      return { authData: res.authData, code: res.code };
-    },
+    select: (res) => res.data.data,
   });
-  const authData = data?.authData;
 
   const { mutate: signupMutate } = useMutation({
     mutationFn: (payload: SignUpPayload) => signup(payload),
     onSuccess: () => {
-      toast.success('회원가입에 성공하였습니다.');
-      router.push(LINKS.HOME);
+      toast.success("회원가입에 성공하였습니다.");
+      router("/");
     },
   });
 
   const submitHandler = (values: AuthSchemaType) => {
-    signupMutate({
-      ...values,
-      ...authData,
-    });
+    if (authData) {
+      signupMutate({
+        ...values,
+        ...authData,
+      });
+    }
   };
 
-  useEffect(() => {
-    if (isSuccess && data?.code === 200) {
-      toast.success('로그인 되었습니다.');
-      router.replace(LINKS.HOME);
+  useLayoutEffect(() => {
+    if (isSuccess && authData?.code === 200) {
+      toast.success("로그인 되었습니다.");
+      router("/", { replace: true });
     }
-  }, [data?.code, router, isSuccess]);
+  }, [authData, router, isSuccess]);
 
   return (
     <div className="shadow-input mx-auto mt-4 w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
@@ -149,7 +150,7 @@ const LabelInputContainer = ({
   className?: string;
 }) => {
   return (
-    <div className={cn('flex w-full flex-col space-y-2', className)}>
+    <div className={cn("flex w-full flex-col space-y-2", className)}>
       {children}
     </div>
   );

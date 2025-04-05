@@ -1,7 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
-import { MessageCircle, ThumbsUp } from 'lucide-react';
-import { PostType } from '@/types/post.type';
+import { MessageCircle, ThumbsUp } from "lucide-react";
+import { PostType } from "@/types/post.type";
+import DOMPurify from "dompurify";
 
 interface AllPostsProps {
   posts: PostType[];
@@ -19,7 +18,7 @@ export const AllPosts = ({ posts }: AllPostsProps) => {
             key={post.id}
             className="border-border flex flex-col gap-4 border-b pb-6 md:flex-row"
           >
-            <Image
+            <img
               src={post.thumbnail}
               alt={post.title}
               width={400}
@@ -28,16 +27,19 @@ export const AllPosts = ({ posts }: AllPostsProps) => {
             />
 
             <div className="flex flex-grow flex-col justify-between">
-              <div>
+              <div className="flex flex-col gap-2">
                 <h3 className="text-card-foreground line-clamp-2 text-xl font-semibold">
                   {post.title}
                 </h3>
-                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                  {post.content}
-                </p>
+                <div
+                  className="text-muted-foreground text-sm line-clamp-2"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(post.content),
+                  }}
+                />
               </div>
               <div className="text-muted-foreground mt-3 text-xs">
-                {new Date(post.createdAt).toLocaleDateString()} ·{' '}
+                {new Date(post.createdAt).toLocaleDateString()} ·{" "}
                 {post.authorName}
               </div>
               <div className="text-muted-foreground mt-2 flex gap-4 text-sm">

@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { Button } from '../ui/button';
-import { BannerFeature } from './banner-feature';
-import { LINKS } from '@/constants/links';
+import { Link } from "react-router";
+import { Button } from "../ui/button";
+import { BannerFeature } from "./banner-feature";
 
 export const Banner = () => {
   return (
@@ -15,7 +14,7 @@ export const Banner = () => {
           미디어 속 그곳에서 당신의 경험을 들려주세요.
         </p>
         <div className="mt-8">
-          <Link href={LINKS.POSTS}>
+          <Link to="/posts">
             <Button variant="default" className="cursor-pointer font-semibold">
               인기 포스트 보러가기
             </Button>

@@ -1,16 +1,14 @@
-import { LINKS } from '@/constants/links';
-import { PostType } from '@/types/post.type';
-import { Heart, User } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { PostType } from "@/types/post.type";
+import { Heart, User } from "lucide-react";
+import { Link } from "react-router";
 
 export const PostCard = ({ post }: { post: PostType }) => {
   return (
     <Link
-      href={LINKS.POST(post.id)}
+      to={`/post/${post.id}`}
       className="flex gap-5 overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 dark:bg-black"
     >
-      <Image
+      <img
         src={post.thumbnail}
         alt={post.title}
         width={120}

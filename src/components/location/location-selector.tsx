@@ -1,17 +1,17 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { LocationSearch } from './location-search';
-import { useLocationStore } from '@/store/useLocationStore';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useRef, useState } from "react";
+import { LocationSearch } from "./location-search";
+import { useLocationStore } from "@/store/useLocationStore";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 declare global {
   interface Window {
-    kakao: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    kakao: any;
   }
 }
+
+const KAKAO_MAP_SCRIPT_ID = "kakao-map-script";
 
 export const LocationSelector = () => {
   const { locations, addLocation, clearLocations } = useLocationStore();
@@ -22,18 +22,43 @@ export const LocationSelector = () => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   useEffect(() => {
-    if (!window.kakao?.maps || !mapRef.current) return;
+    const scriptId = KAKAO_MAP_SCRIPT_ID;
 
-    window.kakao.maps.load(() => {
-      const center = new window.kakao.maps.LatLng(37.5665, 126.978);
-      const mapInstance = new window.kakao.maps.Map(mapRef.current, {
-        center,
-        level: 5,
-      });
+    const loadScriptAndInitMap = () => {
+      const initMap = () => {
+        if (!window.kakao || !window.kakao.maps || !mapRef.current) return;
 
-      setMap(mapInstance);
-      setIsMapLoaded(true);
-    });
+        window.kakao.maps.load(() => {
+          const center = new window.kakao.maps.LatLng(37.5665, 126.978);
+          const mapInstance = new window.kakao.maps.Map(mapRef.current, {
+            center,
+            level: 5,
+          });
+
+          setMap(mapInstance);
+          setIsMapLoaded(true);
+        });
+      };
+
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${
+          import.meta.env.MODE === "development"
+            ? import.meta.env.VITE_KAKAO_MAP_KEY
+            : import.meta.env.KAKAO_MAP_KEY
+        }&libraries=services&autoload=false`;
+        script.onload = initMap;
+
+        document.head.appendChild(script);
+      } else if (window.kakao && window.kakao.maps) {
+        initMap();
+      } else {
+        document.getElementById(scriptId)?.addEventListener("load", initMap);
+      }
+    };
+
+    loadScriptAndInitMap();
   }, []);
 
   useEffect(() => {
@@ -41,10 +66,10 @@ export const LocationSelector = () => {
 
     markers.forEach((marker) => marker.setMap(null));
 
-    const newMarkers = locations.map((place) => {
+    const newMarkers = locations.map((place: any) => {
       const position = new window.kakao.maps.LatLng(
         place.latitude,
-        place.longitude,
+        place.longitude
       );
       const marker = new window.kakao.maps.Marker({
         position,
@@ -56,7 +81,7 @@ export const LocationSelector = () => {
     if (locations.length) {
       const lastPlace = locations[locations.length - 1];
       map.setCenter(
-        new window.kakao.maps.LatLng(lastPlace.latitude, lastPlace.longitude),
+        new window.kakao.maps.LatLng(lastPlace.latitude, lastPlace.longitude)
       );
     }
 
@@ -69,7 +94,7 @@ export const LocationSelector = () => {
       name: place.place_name,
       latitude: Number(place.y),
       longitude: Number(place.x),
-      sequence: locations.length,
+      sequence: locations.length + 1,
     });
   };
 
@@ -105,7 +130,7 @@ export const LocationSelector = () => {
               </Button>
             </div>
             <ul className="mt-2 space-y-1 text-sm">
-              {locations.map((place) => (
+              {locations.map((place: any) => (
                 <li
                   key={place.sequence}
                   className="text-gray-700 dark:text-gray-300"

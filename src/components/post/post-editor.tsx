@@ -44,12 +44,17 @@ export const PostEditor = () => {
 
   const { mutate: create } = useMutation({
     mutationFn: (payload: CreatePostPayload) => createPost(payload),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.data.code === 200) {
         toast.success("게시글이 생성되었습니다.");
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEY.POST.DEFAULT,
-        });
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEY.POST.DEFAULT,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEY.POST.POPULAR,
+          }),
+        ]);
         setLocations([]);
         form.reset();
         router("/");
@@ -61,7 +66,7 @@ export const PostEditor = () => {
     },
   });
 
-  const onSubmit = async (data: PostSchemaType) => {
+  const onSubmit = (data: PostSchemaType) => {
     if (locations.length === 0) {
       toast.error("장소를 선택해주세요.");
       return;
@@ -70,15 +75,27 @@ export const PostEditor = () => {
     create({ ...data, locations });
   };
 
-  const addHashtag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const value = hashtagInput.trim();
-      const currentTags = form.getValues("hashtags");
-      if (value && !currentTags.some((tag) => tag.name === value)) {
-        form.setValue("hashtags", [...currentTags, { name: value }]);
+  const addHashtag = () => {
+    const value = hashtagInput.trim().replace(/,$/, "");
+    const currentTags = form.getValues("hashtags");
+    if (value && !currentTags.some((tag) => tag.name === value)) {
+      form.setValue("hashtags", [...currentTags, { name: value }]);
+    }
+    setHashtagInput("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (!e.nativeEvent.isComposing) {
+        e.preventDefault();
+        addHashtag();
       }
-      setHashtagInput("");
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (hashtagInput) {
+      addHashtag();
     }
   };
 
@@ -130,10 +147,11 @@ export const PostEditor = () => {
               <FormControl>
                 <div>
                   <Input
-                    placeholder="태그 입력 후 엔터 또는 쉼표(,)"
+                    placeholder="태그 입력 후 엔터"
                     value={hashtagInput}
                     onChange={(e) => setHashtagInput(e.target.value)}
-                    onKeyDown={addHashtag}
+                    onKeyDown={handleKeyDown}
+                    onBlur={handleInputBlur}
                   />
                   <div className="flex flex-wrap gap-2 mt-2">
                     {form.watch("hashtags").map((tag) => (

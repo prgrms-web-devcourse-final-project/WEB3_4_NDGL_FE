@@ -6,13 +6,19 @@ export const createPost = async (payload: CreatePostPayload) => {
   return await axiosInstance.post<APIResponse>("/posts", payload);
 };
 
-export const getAllPosts = async (lastId: string | undefined, size: number) => {
+export const getAllPosts = async (lastId?: number, size?: number) => {
   return await axiosInstance.get<{
     data: { contents: PostType[]; hasNext: boolean };
   }>("/posts", {
     params: {
-      lastId,
+      ...(lastId !== undefined && { lastId }),
       size,
     },
   });
+};
+
+export const getPost = async (postId: string) => {
+  return await axiosInstance.get<APIResponse<{ data: PostType }>>(
+    `/posts/${postId}`
+  );
 };

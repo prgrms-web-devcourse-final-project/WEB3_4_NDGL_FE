@@ -1,5 +1,5 @@
 export type PostType = {
-  id: string;
+  id: number;
   title: string;
   content: string;
   authorName: string;
@@ -8,6 +8,7 @@ export type PostType = {
   commentCount: number;
   createdAt: string;
   hashtags: { name: string }[];
+  locations: LocationType[];
 };
 
 export type CreatePostPayload = {

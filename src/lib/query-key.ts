@@ -1,9 +1,10 @@
 const DOMAIN = {
   AUTH: "auth",
   GOOGLE: "google",
-  post: "post",
+  POST: "post",
   POPULAR: "popular",
   LOGIN: "login",
+  COMMENT: "comment",
 };
 
 export const QUERY_KEY = {
@@ -12,7 +13,16 @@ export const QUERY_KEY = {
     GOOGLE: (code?: string) => [DOMAIN.AUTH, DOMAIN.GOOGLE, code],
   },
   POST: {
-    DEFAULT: [DOMAIN.post],
-    POPULAR: [DOMAIN.post, DOMAIN.POPULAR],
+    DEFAULT: [DOMAIN.POST],
+    POPULAR: [DOMAIN.POST, DOMAIN.POPULAR],
+    DETAIL: (postId: string) => [DOMAIN.POST, postId],
+  },
+  COMMENT: {
+    DEFAULT: (postId: string, commentId: string) => [
+      DOMAIN.COMMENT,
+      postId,
+      commentId,
+    ],
+    ALL: (postId: string) => [DOMAIN.COMMENT, postId],
   },
 };

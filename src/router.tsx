@@ -28,6 +28,15 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "post/:postId",
+        lazy: async () => {
+          const { PostDetailPage: Component } = await import(
+            "@/pages/post-detail.page"
+          );
+          return { Component };
+        },
+      },
     ],
   },
   {

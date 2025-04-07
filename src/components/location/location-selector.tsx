@@ -44,9 +44,7 @@ export const LocationSelector = () => {
         const script = document.createElement("script");
         script.id = scriptId;
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${
-          import.meta.env.MODE === "development"
-            ? import.meta.env.VITE_KAKAO_MAP_KEY
-            : import.meta.env.KAKAO_MAP_KEY
+          import.meta.env.VITE_KAKAO_MAP_KEY
         }&libraries=services&autoload=false`;
         script.onload = initMap;
 

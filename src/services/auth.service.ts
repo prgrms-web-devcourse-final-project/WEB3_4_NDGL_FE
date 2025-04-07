@@ -20,3 +20,7 @@ export const hasLogin = async () => {
     APIResponse<{ data: { isLoggedIn: boolean } }>
   >("/auth/status");
 };
+
+export const logout = async () => {
+  return await axiosInstance.post<APIResponse>("/users/logout");
+};

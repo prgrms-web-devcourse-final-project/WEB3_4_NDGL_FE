@@ -30,8 +30,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.2))
       '@tanstack/react-query':
-        specifier: ^5.71.5
-        version: 5.71.5(react@19.1.0)
+        specifier: ^5.71.10
+        version: 5.71.10(react@19.1.0)
       '@tiptap/extension-blockquote':
         specifier: ^2.11.7
         version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))
@@ -186,6 +186,9 @@ importers:
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.23.0
+      '@tanstack/react-query-devtools':
+        specifier: ^5.71.10
+        version: 5.71.10(@tanstack/react-query@5.71.10(react@19.1.0))(react@19.1.0)
       '@types/node':
         specifier: ^22.14.0
         version: 22.14.0
@@ -1088,11 +1091,20 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6
 
-  '@tanstack/query-core@5.71.5':
-    resolution: {integrity: sha512-XOQ5SyjCdwhxyLksGKWSL5poqyEXYPDnsrZAzJm2LgrMm4Yh6VOrfC+IFosXreDw9HNqC11YAMY3HlfHjNzuaA==}
+  '@tanstack/query-core@5.71.10':
+    resolution: {integrity: sha512-/fKEY8fO1nbszfrBatzmhJa1nEwIKn0c6Tv2A1ocSA5OiD2GukOIV8nnBbvJRgZb/VIoBy9/N4PVbABI8YQLow==}
 
-  '@tanstack/react-query@5.71.5':
-    resolution: {integrity: sha512-WpxZWy4fDASjY+iAaXB+aY+LC95PQ34W6EWVkjJ0hdzWWbczFnr9nHvHkVDpwdR18I1NO8igNGQJFrLrgyzI8Q==}
+  '@tanstack/query-devtools@5.71.5':
+    resolution: {integrity: sha512-Fq1JeAp+I52Md/KnyeFxzG7G0RpdHgeOfDNhSPkZQs/JqqXuAfpUf+wFHDz+vP0GZbSnla2JmcLSQebOkIb1yA==}
+
+  '@tanstack/react-query-devtools@5.71.10':
+    resolution: {integrity: sha512-n0xsIzwNvkIoZCmfHww28jFmnVTVzOt5dHj/py3LNFMJHGnJq9o9ttQESzVt2Hr7as00Aqf8ElVwH6na1o6dnw==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.71.10
+      react: ^18 || ^19
+
+  '@tanstack/react-query@5.71.10':
+    resolution: {integrity: sha512-mQYM/ObpL8YMDz8vCoUuHkbe8Yu7NnVRH8aBaBa/3zlufjp1f1VuWjeO3TcumNHfuVMDwEAGinsgwrB7OKADiQ==}
     peerDependencies:
       react: ^18 || ^19
 
@@ -3149,11 +3161,19 @@ snapshots:
       tailwindcss: 4.1.2
       vite: 6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.2)
 
-  '@tanstack/query-core@5.71.5': {}
+  '@tanstack/query-core@5.71.10': {}
 
-  '@tanstack/react-query@5.71.5(react@19.1.0)':
+  '@tanstack/query-devtools@5.71.5': {}
+
+  '@tanstack/react-query-devtools@5.71.10(@tanstack/react-query@5.71.10(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@tanstack/query-core': 5.71.5
+      '@tanstack/query-devtools': 5.71.5
+      '@tanstack/react-query': 5.71.10(react@19.1.0)
+      react: 19.1.0
+
+  '@tanstack/react-query@5.71.10(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.71.10
       react: 19.1.0
 
   '@tiptap/core@2.11.7(@tiptap/pm@2.11.7)':

@@ -1,4 +1,3 @@
-import { FloatingButton } from "@/components/layout/floating-button";
 import { Navbar } from "@/components/layout/navbar";
 import { Outlet } from "react-router";
 
@@ -9,7 +8,6 @@ export const RootLayout = () => {
       <main className="mt-10 sm:mt-20">
         <Outlet />
       </main>
-      <FloatingButton />
     </>
   );
 };

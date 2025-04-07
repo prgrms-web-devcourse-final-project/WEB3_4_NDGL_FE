@@ -10,40 +10,40 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// let isRefreshing = false;
+let isRefreshing = false;
 
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       if (originalRequest.baseURL === "/auth/token/refresh") {
-//         return Promise.reject(error);
-//       }
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (originalRequest.baseURL === "/auth/token/refresh") {
+        return Promise.reject(error);
+      }
 
-//       if (!isRefreshing) {
-//         isRefreshing = true;
+      if (!isRefreshing) {
+        isRefreshing = true;
 
-//         try {
-//           await axiosInstance.post("/auth/token/refresh");
-//           isRefreshing = false;
+        try {
+          await axiosInstance.post("/auth/token/refresh");
+          isRefreshing = false;
 
-//           originalRequest._retry = true;
+          originalRequest._retry = true;
 
-//           const result = await axiosInstance(originalRequest);
-//           delete originalRequest._retry;
+          const result = await axiosInstance(originalRequest);
+          delete originalRequest._retry;
 
-//           return result;
-//         } catch (refreshError) {
-//           isRefreshing = false;
-//           delete originalRequest._retry;
+          return result;
+        } catch (refreshError) {
+          isRefreshing = false;
+          delete originalRequest._retry;
 
-//           return Promise.reject(refreshError);
-//         }
-//       }
-//     }
+          return Promise.reject(refreshError);
+        }
+      }
+    }
 
-//     return Promise.reject(error);
-//   }
-// );
+    return Promise.reject(error);
+  }
+);

@@ -20,17 +20,34 @@ import {
 } from "../ui/accordion";
 import { NavbarSearch } from "./navbar-search";
 import { ThemeToggle } from "../ui/theme-toggle";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
-import { hasLogin } from "@/services/auth.service";
+import { hasLogin, logout } from "@/services/auth.service";
+import { toast } from "sonner";
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: QUERY_KEY.AUTH.LOGIN,
     queryFn: hasLogin,
     select: (res) => res.data.data,
+  });
+
+  const { mutate: logoutMutation } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      toast.success("로그아웃되었습니다.");
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.AUTH.LOGIN,
+      });
+    },
+    onError: (err) => {
+      console.error(err);
+      toast.error(err.message || "로그아웃에 실패하였습니다.");
+    },
   });
 
   return (
@@ -41,7 +58,11 @@ export const Navbar = () => {
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
             {data?.isLoggedIn ? (
-              <NavbarButton as="div" variant="secondary">
+              <NavbarButton
+                onClick={() => logoutMutation()}
+                as="div"
+                variant="secondary"
+              >
                 <Link to="#">로그아웃</Link>
               </NavbarButton>
             ) : (
@@ -97,7 +118,11 @@ export const Navbar = () => {
             })}
             <div className="flex w-full flex-col gap-4">
               {data?.isLoggedIn ? (
-                <NavbarButton variant="primary" className="w-full">
+                <NavbarButton
+                  onClick={() => logoutMutation()}
+                  variant="primary"
+                  className="w-full"
+                >
                   <Link to="#">로그아웃</Link>
                 </NavbarButton>
               ) : (

@@ -20,15 +20,13 @@ import {
 } from "../ui/accordion";
 import { NavbarSearch } from "./navbar-search";
 import { ThemeToggle } from "../ui/theme-toggle";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
 import { hasLogin, logout } from "@/services/auth.service";
 import { toast } from "sonner";
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: QUERY_KEY.AUTH.LOGIN,
@@ -40,9 +38,8 @@ export const Navbar = () => {
     mutationFn: logout,
     onSuccess: () => {
       toast.success("로그아웃되었습니다.");
-      queryClient.invalidateQueries({
-        queryKey: QUERY_KEY.AUTH.LOGIN,
-      });
+      window.location.reload();
+      window.localStorage.removeItem("authData");
     },
     onError: (err) => {
       console.error(err);
@@ -57,7 +54,7 @@ export const Navbar = () => {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            {data?.isLoggedIn ? (
+            {data && data.isLoggedIn ? (
               <NavbarButton
                 onClick={() => logoutMutation()}
                 as="div"

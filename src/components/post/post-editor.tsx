@@ -47,14 +47,14 @@ export const PostEditor = () => {
     onSuccess: async (data) => {
       if (data.data.code === 200) {
         toast.success("게시글이 생성되었습니다.");
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: QUERY_KEY.POST.DEFAULT,
-          }),
-          queryClient.invalidateQueries({
-            queryKey: QUERY_KEY.POST.POPULAR,
-          }),
-        ]);
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEY.POST.DEFAULT,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEY.POST.POPULAR,
+          refetchType: "all",
+        });
         setLocations([]);
         form.reset();
         router("/");

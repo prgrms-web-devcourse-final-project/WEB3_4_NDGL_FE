@@ -9,9 +9,8 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "https://ndgl.p-e.kr/app-dev",
+        target: "https://api.ndgl.shop",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

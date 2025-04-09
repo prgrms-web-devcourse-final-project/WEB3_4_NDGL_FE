@@ -20,9 +20,15 @@ import { commentSchema, CommentSchemaType } from "@/schemas/comment.schema";
 
 interface CreateCommentProps {
   parentId?: number | null;
+  initialContent?: string;
+  onUpdate?: (content: string) => void;
 }
 
-export const CreateComment = ({ parentId = null }: CreateCommentProps) => {
+export const CreateComment = ({
+  parentId = null,
+  initialContent,
+  onUpdate,
+}: CreateCommentProps) => {
   const params = useParams<{ postId: string }>();
   const postId = params.postId || "";
 
@@ -30,7 +36,7 @@ export const CreateComment = ({ parentId = null }: CreateCommentProps) => {
 
   const form = useForm<CommentSchemaType>({
     resolver: zodResolver(commentSchema),
-    defaultValues: { content: "" },
+    defaultValues: { content: initialContent || "" },
   });
 
   const { mutate: createCommentMutation, isPending } = useMutation({
@@ -59,7 +65,9 @@ export const CreateComment = ({ parentId = null }: CreateCommentProps) => {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit((values) =>
-              createCommentMutation(values)
+              initialContent && onUpdate
+                ? onUpdate(values.content)
+                : createCommentMutation(values)
             )}
             className="flex flex-col space-y-2 gap-2"
           >

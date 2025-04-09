@@ -12,4 +12,5 @@ export type GoogleLoginResponse = {
   identify: string;
   message: string;
   provider: string;
+  userId: number;
 };

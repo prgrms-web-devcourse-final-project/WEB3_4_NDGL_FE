@@ -11,7 +11,7 @@ export const createComment = async (
   });
 };
 
-export const deleteComment = async (postId: string, commentId: number) => {
+export const deleteComment = async (postId: string, commentId: string) => {
   return await axiosInstance.delete<APIResponse>(
     `/posts/${postId}/comments/${commentId}`
   );
@@ -19,7 +19,7 @@ export const deleteComment = async (postId: string, commentId: number) => {
 
 export const updateComment = async (
   postId: string,
-  commentId: number,
+  commentId: string,
   payload: CommentPayload
 ) => {
   return await axiosInstance.put<APIResponse>(
@@ -48,5 +48,11 @@ export const getAllComments = async (
 export const getComment = async (postId: string, commentId: number) => {
   return await axiosInstance.get<APIResponse<{ data: CommentType }>>(
     `/posts/${postId}/comments/${commentId}`
+  );
+};
+
+export const likeComment = async (commentId: string) => {
+  return await axiosInstance.post<APIResponse<{ data: boolean }>>(
+    `/like/comments/${commentId}`
   );
 };

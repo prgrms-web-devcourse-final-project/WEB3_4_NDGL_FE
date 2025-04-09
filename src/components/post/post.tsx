@@ -2,10 +2,11 @@ import { motion } from "motion/react";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
-import { getPost } from "@/services/post.service";
+import { getPost, likePost } from "@/services/post.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Heart } from "lucide-react";
 
 const KAKAO_MAP_SCRIPT_ID = "kakao-map-script";
 
@@ -16,6 +17,8 @@ export const Post = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
+  const queryClient = useQueryClient();
+
   const {
     data: post,
     isLoading,
@@ -25,6 +28,15 @@ export const Post = () => {
     queryFn: () => getPost(postId),
     enabled: postId !== "",
     select: (res) => res.data.data,
+  });
+
+  const { mutate: likePostMutation } = useMutation({
+    mutationFn: () => likePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.DETAIL(postId),
+      });
+    },
   });
 
   useEffect(() => {
@@ -90,6 +102,10 @@ export const Post = () => {
     loadScriptAndInitMap();
   }, [post]);
 
+  const handleLike = () => {
+    likePostMutation();
+  };
+
   if (isLoading)
     return (
       <div className="container mx-auto py-10 space-y-6">
@@ -119,20 +135,33 @@ export const Post = () => {
           className="w-full h-[400px] rounded-xl object-cover shadow-lg"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
-        <div className="absolute bottom-6 left-6 right-6">
-          <h1 className="text-white text-4xl font-bold drop-shadow-lg line-clamp-2 overflow-hidden">
-            {post.title}
-          </h1>
-          <div className="flex gap-3 mt-3">
-            {post.hashtags.map((tag) => (
-              <span
-                key={tag.name}
-                className="px-3 py-1 bg-indigo-600/90 rounded-full text-sm text-white shadow"
-              >
-                #{tag.name}
-              </span>
-            ))}
+        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-white text-4xl font-bold drop-shadow-lg line-clamp-2 overflow-hidden">
+              {post.title}
+            </h1>
+            <div className="flex gap-3 mt-3">
+              {post.hashtags.map((tag) => (
+                <span
+                  key={tag.name}
+                  className="px-3 py-1 bg-indigo-600/90 rounded-full text-sm text-white shadow"
+                >
+                  #{tag.name}
+                </span>
+              ))}
+            </div>
           </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 rounded-full py-2 px-4 shadow backdrop-blur-sm"
+            onClick={handleLike}
+          >
+            <Heart className="w-5 h-5 text-red-500" />
+            <span className="font-semibold text-sm">
+              {post.likeCount} 좋아요
+            </span>
+          </motion.button>
         </div>
       </div>
       <div

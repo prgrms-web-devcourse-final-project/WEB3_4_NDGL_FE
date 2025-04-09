@@ -1,16 +1,27 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getAllComments } from "@/services/comment.service";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  deleteComment,
+  getAllComments,
+  likeComment,
+  updateComment,
+} from "@/services/comment.service";
 import { QUERY_KEY } from "@/lib/query-key";
 import { useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CommentType } from "@/types/comment.type";
+import { CommentPayload, CommentType } from "@/types/comment.type";
 import { CreateComment } from "@/components/comment/create-comment";
 import { hasLogin } from "@/services/auth.service";
 import { cn } from "@/lib/utils";
+import { useUserId } from "@/hooks/useUserId";
 
 const CommentItem = ({
   comment,
@@ -20,11 +31,45 @@ const CommentItem = ({
   depth?: number;
 }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const queryClient = useQueryClient();
+  const { userId } = useUserId();
 
   const { data } = useQuery({
     queryKey: QUERY_KEY.AUTH.LOGIN,
     queryFn: hasLogin,
     select: (res) => res.data.data,
+  });
+
+  const { mutate: likeCommentMutation } = useMutation({
+    mutationFn: () => likeComment(comment.id.toString()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.COMMENT.ALL(comment.postId.toString()),
+      });
+    },
+  });
+
+  const { mutate: deleteCommentMutation } = useMutation({
+    mutationFn: () =>
+      deleteComment(comment.postId.toString(), comment.id.toString()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.COMMENT.ALL(comment.postId.toString()),
+      });
+    },
+  });
+
+  const { mutate: updateCommentMutation } = useMutation({
+    mutationFn: (payload: CommentPayload) =>
+      updateComment(comment.postId.toString(), comment.id.toString(), payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.COMMENT.ALL(comment.postId.toString()),
+      });
+      setIsEditing(false);
+    },
   });
 
   const canReply = depth === 0;
@@ -48,44 +93,79 @@ const CommentItem = ({
           {new Date(comment.createdAt).toLocaleString()}
         </span>
       </div>
-      <p className="text-sm dark:text-gray-300 whitespace-pre-wrap">
-        {comment.content}
-      </p>
-      <div className="flex items-center gap-4 text-xs text-gray-500">
-        <div
-          className={cn(
-            "flex items-center gap-1 text-foreground",
-            data?.isLoggedIn
-              ? "hover:text-red-500 cursor-pointer"
-              : "hover:text-foreground"
-          )}
-        >
-          <Heart size={14} /> {comment.likeCount}
-        </div>
-        {canReply && (
-          <div
+      {isEditing ? (
+        <CreateComment
+          parentId={comment.parentId}
+          initialContent={comment.content}
+          onUpdate={(content) =>
+            updateCommentMutation({ content, parentId: comment.parentId })
+          }
+        />
+      ) : (
+        <p className="text-sm dark:text-gray-300 whitespace-pre-wrap">
+          {comment.content}
+        </p>
+      )}
+      <div className="flex items-center justify-between gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-4">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            onClick={() => likeCommentMutation()}
             className={cn(
               "flex items-center gap-1 text-foreground",
               data?.isLoggedIn
-                ? "hover:text-blue-500 cursor-pointer"
+                ? "hover:text-red-500 cursor-pointer"
                 : "hover:text-foreground"
             )}
-            onClick={() => {
-              if (data?.isLoggedIn) {
-                setShowReplyForm(!showReplyForm);
-              }
-            }}
           >
-            <MessageSquare size={14} /> {comment.replies.length}{" "}
-            {data?.isLoggedIn ? "댓글 달기" : ""}
+            <Heart size={14} /> {comment.likeCount}
+          </motion.button>
+          {canReply && (
+            <div
+              className={cn(
+                "flex items-center gap-1 text-foreground",
+                data?.isLoggedIn
+                  ? "hover:text-blue-500 cursor-pointer"
+                  : "hover:text-foreground"
+              )}
+              onClick={() => {
+                if (data?.isLoggedIn) {
+                  setShowReplyForm(!showReplyForm);
+                }
+              }}
+            >
+              <MessageSquare size={14} /> {comment.replies.length}{" "}
+              {data?.isLoggedIn ? "댓글 달기" : ""}
+            </div>
+          )}
+        </div>
+        {userId && userId === comment.authorId && (
+          <div className="flex items-center gap-4">
+            <button
+              className="hover:text-green-500 cursor-pointer"
+              onClick={() => {
+                if (isEditing) {
+                  setIsEditing(false);
+                } else {
+                  setIsEditing(true);
+                }
+              }}
+            >
+              {isEditing ? "취소" : "수정"}
+            </button>
+            <button
+              className="hover:text-red-500 cursor-pointer"
+              onClick={() => deleteCommentMutation()}
+            >
+              삭제
+            </button>
           </div>
         )}
       </div>
-
       {data?.isLoggedIn && showReplyForm && canReply && (
         <CreateComment parentId={comment.id} />
       )}
-
       {canReply &&
         comment.replies.map((reply) => (
           <CommentItem key={reply.id} comment={reply} depth={depth + 1} />

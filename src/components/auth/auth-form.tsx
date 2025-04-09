@@ -24,6 +24,7 @@ import { Card, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router";
 import { googleLogin, signup } from "@/services/auth.service";
+import { setLocalStorage } from "@/lib/storage";
 
 export const AuthForm = () => {
   const [searchParams] = useSearchParams();
@@ -69,6 +70,10 @@ export const AuthForm = () => {
 
   useLayoutEffect(() => {
     if (isSuccess && authData?.code === 200) {
+      setLocalStorage(
+        "authData",
+        JSON.stringify({ userId: authData.userId, email: authData.email })
+      );
       toast.success("로그인 되었습니다.");
       router("/", { replace: true });
     }

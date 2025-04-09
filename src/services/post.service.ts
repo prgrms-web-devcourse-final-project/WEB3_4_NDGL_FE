@@ -22,3 +22,9 @@ export const getPost = async (postId: string) => {
     `/posts/${postId}`
   );
 };
+
+export const likePost = async (postId: string) => {
+  return await axiosInstance.post<APIResponse<{ data: boolean }>>(
+    `/like/posts/${postId}`
+  );
+};

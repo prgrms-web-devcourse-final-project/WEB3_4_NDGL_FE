@@ -1,6 +1,7 @@
 export type CommentType = {
   id: number;
   content: string;
+  authorId: number;
   authorName: string;
   postId: number;
   parentId: number | null;

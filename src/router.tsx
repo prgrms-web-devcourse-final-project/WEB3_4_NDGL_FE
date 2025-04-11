@@ -18,6 +18,13 @@ export const router = createBrowserRouter([
         loader: protectedLoader,
         children: [
           {
+            path: "mypage",
+            lazy: async () => {
+              const { MyPage: Component } = await import("@/pages/mypage.page");
+              return { Component };
+            },
+          },
+          {
             path: "post/create",
             lazy: async () => {
               const { PostCreatePage: Component } = await import(

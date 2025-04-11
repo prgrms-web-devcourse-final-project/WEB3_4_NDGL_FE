@@ -6,6 +6,7 @@ const DOMAIN = {
   LOGIN: "login",
   COMMENT: "comment",
   SEARCH: "search",
+  USER: "user",
 };
 
 export const QUERY_KEY = {
@@ -26,5 +27,8 @@ export const QUERY_KEY = {
       commentId,
     ],
     ALL: (postId: string) => [DOMAIN.COMMENT, postId],
+  },
+  USER: {
+    DEFAULT: [DOMAIN.USER],
   },
 };

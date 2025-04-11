@@ -94,7 +94,11 @@ export const Navbar = () => {
                     className="relative w-full text-neutral-600 dark:text-neutral-300"
                   >
                     <AccordionItem value="item-1">
-                      <AccordionTrigger>{item.name}</AccordionTrigger>
+                      {item.link && (
+                        <AccordionTrigger>
+                          <Link to={item.link}>{item.name}</Link>
+                        </AccordionTrigger>
+                      )}
                       <AccordionContent>좋아요</AccordionContent>
                       <AccordionContent>팔로우</AccordionContent>
                     </AccordionItem>

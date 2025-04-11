@@ -15,7 +15,7 @@ import { AnimInput } from "../ui/anim-input";
 import { AnimLabel } from "../ui/anim-label";
 import { Button } from "../ui/button";
 import { BottomGradient } from "../ui/bottom-gradient";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SignUpPayload } from "@/types/auth.type";
 import { useLayoutEffect } from "react";
 import { QUERY_KEY } from "@/lib/query-key";
@@ -31,6 +31,8 @@ export const AuthForm = () => {
   const router = useNavigate();
 
   const code = searchParams.get("code") ?? "";
+
+  const queryClient = useQueryClient();
 
   const form = useForm<AuthSchemaType>({
     resolver: zodResolver(authSchema),
@@ -75,6 +77,10 @@ export const AuthForm = () => {
         JSON.stringify({ userId: authData.userId, email: authData.email })
       );
       toast.success("로그인 되었습니다.");
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.AUTH.LOGIN,
+        type: "all",
+      });
       router("/", { replace: true });
     }
   }, [authData, router, isSuccess]);

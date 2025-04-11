@@ -59,6 +59,7 @@ export const Post = () => {
   const { mutate: followMutation } = useMutation({
     mutationFn: (userId: string) => follow(userId),
     onSuccess: () => {
+      toast.success("팔로우 성공");
       queryClient.invalidateQueries({
         queryKey: QUERY_KEY.POST.DETAIL(postId),
       });
@@ -71,6 +72,7 @@ export const Post = () => {
   // const { mutate: unFollowMutation } = useMutation({
   //   mutationFn: () => unFollow(user?.userId.toString() ?? ""),
   //   onSuccess: () => {
+  //     toast.success("언팔로우 성공");
   //     queryClient.invalidateQueries({
   //       queryKey: QUERY_KEY.POST.DETAIL(postId),
   //     });

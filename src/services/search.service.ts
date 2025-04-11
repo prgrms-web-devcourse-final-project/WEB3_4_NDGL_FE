@@ -8,7 +8,7 @@ export const searchPosts = async (
 ) => {
   return await axiosInstance.get<{
     data: { contents: PostType[]; hasNext: boolean };
-  }>("/posts", {
+  }>("/posts/search", {
     params: {
       ...(lastId !== undefined && { lastId }),
       size,

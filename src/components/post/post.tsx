@@ -1,23 +1,40 @@
 import { motion } from "motion/react";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
-import { getPost, likePost } from "@/services/post.service";
+import { deletePost, getPost, likePost } from "@/services/post.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Heart } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { useUser } from "@/hooks/useUser";
+import { DotsIcon } from "../ui/icons";
+import { useModalStore } from "@/store/useModalStore";
+import { IMAGE } from "@/constants/img";
+import { follow } from "@/services/user.service";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 const KAKAO_MAP_SCRIPT_ID = "kakao-map-script";
 
 export const Post = () => {
+  const router = useNavigate();
   const params = useParams<{ postId: string }>();
   const postId = params.postId ?? "";
 
   const mapRef = useRef<HTMLDivElement>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
+
+  const { user } = useUser();
 
   const {
     data: post,
@@ -36,6 +53,42 @@ export const Post = () => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEY.POST.DETAIL(postId),
       });
+    },
+  });
+
+  const { mutate: followMutation } = useMutation({
+    mutationFn: (userId: string) => follow(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.DETAIL(postId),
+      });
+    },
+    onError: (err: AxiosError) => {
+      const errorMessage = (err.response?.data as { message: string }).message;
+      toast.error(errorMessage ?? "follow Error,,,");
+    },
+  });
+  // const { mutate: unFollowMutation } = useMutation({
+  //   mutationFn: () => unFollow(user?.userId.toString() ?? ""),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: QUERY_KEY.POST.DETAIL(postId),
+  //     });
+  //   },
+  // });
+
+  const { mutate: deletePostMutation } = useMutation({
+    mutationFn: () => deletePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.DEFAULT,
+        type: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.POPULAR,
+        type: "all",
+      });
+      router("/");
     },
   });
 
@@ -106,6 +159,16 @@ export const Post = () => {
     likePostMutation();
   };
 
+  const handleDeleteClick = async () => {
+    const confirmed = await useModalStore.getState().onOpen("confirm");
+
+    if (confirmed) {
+      deletePostMutation();
+    } else {
+      console.log("사용자가 취소하였습니다.");
+    }
+  };
+
   if (isLoading)
     return (
       <div className="container mx-auto py-10 space-y-6">
@@ -130,16 +193,16 @@ export const Post = () => {
     >
       <div className="relative">
         <img
-          src={post.thumbnail}
+          src={post.thumbnail || IMAGE.NO_IMG}
           alt={post.title}
           className="w-full h-[400px] rounded-xl object-cover shadow-lg"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-xl" />
-        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-          <div>
-            <h1 className="text-white text-4xl font-bold drop-shadow-lg line-clamp-2 overflow-hidden">
-              {post.title}
-            </h1>
+        <div className="absolute bottom-6 left-6 right-6">
+          <h1 className="text-white text-2xl break-words md:text-4xl font-bold drop-shadow-lg line-clamp-2 w-full overflow-hidden">
+            {post.title}
+          </h1>
+          <div className="w-full flex items-center justify-between">
             <div className="flex gap-3 mt-3">
               {post.hashtags.map((tag) => (
                 <span
@@ -150,22 +213,69 @@ export const Post = () => {
                 </span>
               ))}
             </div>
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.1 }}
+                className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 rounded-full py-2 px-4 shadow backdrop-blur-sm cursor-pointer"
+                onClick={handleLike}
+              >
+                <Heart className="w-5 h-5 text-red-500" />
+                <span className="font-semibold text-sm">
+                  {post.likeCount}{" "}
+                  <span className="hidden md:inline">좋아요</span>
+                </span>
+              </motion.button>
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger>
+                  <DotsIcon
+                    className="cursor-pointer size-8 p-1 bg-foreground/30 border rounded-full"
+                    pathClassName="fill-background"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {user && user.userId === post.authorId && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router(`/post/create?postid=${postId}&mode=edit`)
+                      }
+                      className="cursor-pointer"
+                    >
+                      수정
+                    </DropdownMenuItem>
+                  )}
+                  {user && user.userId === post.authorId && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        handleDeleteClick();
+                      }}
+                      className="cursor-pointer text-destructive"
+                    >
+                      삭제
+                    </DropdownMenuItem>
+                  )}
+                  {user && user.userId !== post.authorId && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        followMutation(post.authorId.toString());
+                      }}
+                      className="cursor-pointer"
+                    >
+                      팔로우
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem className="cursor-pointer">
+                    신고
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.1 }}
-            className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 rounded-full py-2 px-4 shadow backdrop-blur-sm"
-            onClick={handleLike}
-          >
-            <Heart className="w-5 h-5 text-red-500" />
-            <span className="font-semibold text-sm">
-              {post.likeCount} 좋아요
-            </span>
-          </motion.button>
         </div>
       </div>
       <div
-        className="prose prose-lg max-w-none dark:prose-invert"
+        className="prose prose-lg max-w-full dark:prose-invert break-words"
         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

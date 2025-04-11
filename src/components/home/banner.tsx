@@ -14,9 +14,9 @@ export const Banner = () => {
           미디어 속 그곳에서 당신의 경험을 들려주세요.
         </p>
         <div className="mt-8">
-          <Link to="/posts">
+          <Link to="/post">
             <Button variant="default" className="cursor-pointer font-semibold">
-              인기 포스트 보러가기
+              전체 포스트 보러가기
             </Button>
           </Link>
         </div>

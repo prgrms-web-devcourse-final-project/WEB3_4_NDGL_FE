@@ -10,6 +10,7 @@ export type PostType = {
   createdAt: string;
   hashtags: { name: string }[];
   locations: LocationType[];
+  likeStatus: boolean;
 };
 
 export type CreatePostPayload = {

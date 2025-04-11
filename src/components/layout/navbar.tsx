@@ -129,7 +129,7 @@ export const Navbar = () => {
               )}
               <div className="flex items-center gap-2">
                 <ThemeToggle />
-                <NavbarSearch />
+                <NavbarSearch onClose={() => setIsMobileMenuOpen(false)} />
               </div>
             </div>
           </MobileNavMenu>

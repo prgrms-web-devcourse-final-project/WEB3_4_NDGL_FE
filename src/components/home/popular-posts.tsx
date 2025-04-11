@@ -8,6 +8,7 @@ import {
 import { MessageCircle, ThumbsUp } from "lucide-react";
 import { PostType } from "@/types/post.type";
 import { Link } from "react-router";
+import { IMAGE } from "@/constants/img";
 
 interface PopularPostsCarouselProps {
   posts: PostType[];
@@ -25,7 +26,7 @@ export const PopularPosts = ({ posts }: PopularPostsCarouselProps) => {
             <Link key={post.id} to={`/post/${post.id}`}>
               <div className="border-border bg-card flex h-full flex-col overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg">
                 <img
-                  src={post.thumbnail}
+                  src={post.thumbnail || IMAGE.NO_IMG}
                   alt={post.title}
                   width={600}
                   height={400}

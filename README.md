@@ -1,54 +1,56 @@
-# React + TypeScript + Vite
+# 미디어에 나온 유명 장소 정보 공유 플랫폼
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+미디어에 소개된 유명 장소의 정보를 공유하고 사용자가 방문 후기를 작성하며, 같은 관심사를 가진 사용자들 간의 커뮤니티를 형성하는 플랫폼입니다.
 
-Currently, two official plugins are available:
+## 프로젝트 소개
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 미디어(영화, 드라마, 예능 등)에 등장한 장소 정보를 손쉽게 찾고 방문 후기를 공유할 수 있습니다.
+- 사용자 간의 커뮤니티 형성과 국내 관광지 활성화에 기여합니다.
 
-## Expanding the ESLint configuration
+## 기술 스택
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| 카테고리    | 기술                    |
+| ----------- | ----------------------- |
+| 언어        | TypeScript              |
+| 프레임워크  | React (v19), Vite       |
+| 상태 관리   | Tanstack Query, Zustand |
+| 스타일      | Tailwind CSS            |
+| 폼 관리     | React Hook Form, Zod    |
+| 에디터      | Tiptap                  |
+| 애니메이션  | Motion                  |
+| UI 컴포넌트 | Shadcn                  |
+| 라우팅      | React Router            |
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 프로젝트 설정 방법
+
+### 사전 요구 사항
+
+- Node.js v22
+- pnpm v10.6.5
+
+### 설치 방법
+
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 로컬 개발 서버 실행
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+pnpm run dev
 ```
+
+### 빌드 및 배포
+
+```bash
+pnpm run build
+```
+
+## 주요 기능
+
+- 전체 블로그 및 포스트 확인
+- 위치 정보를 추가한 포스트 작성
+- 실시간 인기글 조회
+- 좋아요한 포스트 모아보기
+- 포스트 댓글 및 대댓글 작성, 수정, 삭제
+- 포스트 및 댓글 신고 기능

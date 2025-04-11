@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent } from "@tiptap/react";
 import {
   StarterKit,
   Bold,
@@ -27,15 +27,15 @@ import {
   Placeholder,
   TextAlign,
   CharacterCount,
-} from '@/lib/tiptap';
-import { Button } from '@/components/ui/button';
+} from "@/lib/tiptap";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   BoldIcon,
   ItalicIcon,
@@ -45,20 +45,27 @@ import {
   UnderlineIcon,
   StrikethroughIcon,
   CodeIcon,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import TextStyle from '@tiptap/extension-text-style';
-import { Level } from '@tiptap/extension-heading';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import TextStyle from "@tiptap/extension-text-style";
+import { Level } from "@tiptap/extension-heading";
+import { useEffect } from "react";
 
 const fontSizeMap: { [key: string]: string } = {
-  '1': '가장 큼',
-  '2': '큼',
-  '3': '보통',
-  '4': '작음',
-  '5': '가장 작음',
+  "1": "가장 큼",
+  "2": "큼",
+  "3": "보통",
+  "4": "작음",
+  "5": "가장 작음",
 };
 
-export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
+export const Editor = ({
+  content,
+  onChange,
+}: {
+  content: string;
+  onChange: (html: string) => void;
+}) => {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -86,16 +93,16 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
       Youtube,
       Highlight,
       HorizontalRule,
-      Placeholder.configure({ placeholder: '내용을 작성하세요...' }),
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Placeholder.configure({ placeholder: "내용을 작성하세요..." }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       CharacterCount,
       TextStyle,
     ],
-    content: '',
+    content: content || "",
     editorProps: {
       attributes: {
         class:
-          'border rounded-md bg-white dark:bg-gray-800 shadow-sm min-h-[300px] p-4 prose dark:prose-invert max-w-none',
+          "border rounded-md bg-white dark:bg-gray-800 shadow-sm min-h-[300px] p-4 prose dark:prose-invert max-w-full break-words whitespace-pre-wrap",
       },
     },
     onUpdate({ editor }) {
@@ -103,9 +110,15 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
     },
   });
 
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content || "");
+    }
+  }, [content, editor]);
+
   if (!editor) return null;
 
-  const alignment = ['left', 'center', 'right', 'justify'];
+  const alignment = ["left", "center", "right", "justify"];
 
   return (
     <div className="flex flex-col gap-2">
@@ -115,7 +128,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('bold') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("bold") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
@@ -126,7 +139,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('italic') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("italic") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
@@ -137,7 +150,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('underline') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("underline") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
@@ -148,7 +161,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('strike') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("strike") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleStrike().run()}
         >
@@ -159,7 +172,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('code') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("code") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleCode().run()}
         >
@@ -170,7 +183,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('bulletList') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("bulletList") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
@@ -181,7 +194,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('orderedList') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("orderedList") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
@@ -192,7 +205,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
           variant="ghost"
           size="icon"
           className={cn(
-            editor.isActive('blockquote') && 'bg-gray-300 dark:bg-gray-600',
+            editor.isActive("blockquote") && "bg-gray-300 dark:bg-gray-600"
           )}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
@@ -228,7 +241,7 @@ export const Editor = ({ onChange }: { onChange: (html: string) => void }) => {
             <SelectValue placeholder="글자 크기" />
           </SelectTrigger>
           <SelectContent>
-            {['1', '2', '3', '4', '5'].map((size) => (
+            {["1", "2", "3", "4", "5"].map((size) => (
               <SelectItem key={size} value={size}>
                 {fontSizeMap[size]}
               </SelectItem>

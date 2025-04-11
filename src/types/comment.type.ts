@@ -9,6 +9,7 @@ export type CommentType = {
   createdAt: string;
   modifiedAt: string;
   replies: CommentType[];
+  likeStatus: boolean;
 };
 
 export type CommentPayload = {

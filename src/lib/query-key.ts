@@ -5,6 +5,7 @@ const DOMAIN = {
   POPULAR: "popular",
   LOGIN: "login",
   COMMENT: "comment",
+  SEARCH: "search",
 };
 
 export const QUERY_KEY = {
@@ -16,6 +17,7 @@ export const QUERY_KEY = {
     DEFAULT: [DOMAIN.POST],
     POPULAR: [DOMAIN.POST, DOMAIN.POPULAR],
     DETAIL: (postId: string) => [DOMAIN.POST, postId],
+    SEARCH: (query: string) => [DOMAIN.POST, DOMAIN.SEARCH, query],
   },
   COMMENT: {
     DEFAULT: (postId: string, commentId: string) => [

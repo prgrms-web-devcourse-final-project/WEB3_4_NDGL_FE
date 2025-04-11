@@ -79,7 +79,7 @@ export const CreateComment = ({
                   <FormControl>
                     <Textarea
                       placeholder="댓글을 작성하세요..."
-                      className="resize-none bg-transparent border-none focus:ring-0 shadow-none text-sm dark:text-gray-300"
+                      className="resize-none bg-gray-100 dark:bg-gray-800 border-none focus:ring-0 shadow-none text-sm dark:text-gray-300"
                       rows={2}
                       {...field}
                     />

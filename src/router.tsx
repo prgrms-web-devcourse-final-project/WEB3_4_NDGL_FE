@@ -37,6 +37,15 @@ export const router = createBrowserRouter([
           return { Component };
         },
       },
+      {
+        path: "post",
+        lazy: async () => {
+          const { PostListPage: Component } = await import(
+            "@/pages/post-list.page"
+          );
+          return { Component };
+        },
+      },
     ],
   },
   {

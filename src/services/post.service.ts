@@ -28,3 +28,23 @@ export const likePost = async (postId: string) => {
     `/like/posts/${postId}`
   );
 };
+
+export const updatePost = async (
+  postId: string,
+  payload: CreatePostPayload
+) => {
+  return await axiosInstance.put<APIResponse<{ data: PostType }>>(
+    `/posts/${postId}`,
+    payload
+  );
+};
+
+export const deletePost = async (postId: string) => {
+  return await axiosInstance.delete<APIResponse>(`/posts/${postId}`);
+};
+
+export const getPostsByUserId = async (userId: string) => {
+  return await axiosInstance.get<
+    APIResponse<{ data: { contents: PostType[]; hasNext: boolean } }>
+  >(`/posts/users/${userId}`);
+};

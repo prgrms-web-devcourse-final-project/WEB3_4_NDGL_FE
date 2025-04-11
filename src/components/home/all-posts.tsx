@@ -2,6 +2,7 @@ import { MessageCircle, ThumbsUp } from "lucide-react";
 import { PostType } from "@/types/post.type";
 import DOMPurify from "dompurify";
 import { Link } from "react-router";
+import { IMAGE } from "@/constants/img";
 
 interface AllPostsProps {
   posts: PostType[];
@@ -18,7 +19,7 @@ export const AllPosts = ({ posts }: AllPostsProps) => {
           <Link key={post.id} to={`/post/${post.id}`}>
             <article className="border-border flex flex-col gap-4 border-b pb-6 md:flex-row">
               <img
-                src={post.thumbnail}
+                src={post.thumbnail || IMAGE.NO_IMG}
                 alt={post.title}
                 width={400}
                 height={250}

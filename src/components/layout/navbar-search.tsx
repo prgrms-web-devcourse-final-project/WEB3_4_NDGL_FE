@@ -7,12 +7,16 @@ import { searchSchema, type SearchSchemaType } from "@/schemas/search.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SearchIcon } from "lucide-react";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router";
 
 type SearchProps = {
   placeholder?: string;
+  onClose?: () => void;
 };
 
-export const NavbarSearch = ({ placeholder }: SearchProps) => {
+export const NavbarSearch = ({ placeholder, onClose }: SearchProps) => {
+  const router = useNavigate();
+
   const form = useForm<SearchSchemaType>({
     defaultValues: {
       query: "",
@@ -21,7 +25,13 @@ export const NavbarSearch = ({ placeholder }: SearchProps) => {
   });
 
   const submitHandler = (values: SearchSchemaType) => {
-    console.log(values);
+    const trimmedQuery = values.query.trim();
+    if (!trimmedQuery) {
+      return;
+    }
+    form.reset();
+    onClose?.();
+    router(`/post?query=${encodeURIComponent(trimmedQuery)}`);
   };
 
   return (

@@ -21,7 +21,8 @@ import { CommentPayload, CommentType } from "@/types/comment.type";
 import { CreateComment } from "@/components/comment/create-comment";
 import { hasLogin } from "@/services/auth.service";
 import { cn } from "@/lib/utils";
-import { useUserId } from "@/hooks/useUserId";
+import { useUser } from "@/hooks/useUser";
+import { useModalStore } from "@/store/useModalStore";
 
 const CommentItem = ({
   comment,
@@ -34,7 +35,7 @@ const CommentItem = ({
   const [isEditing, setIsEditing] = useState(false);
 
   const queryClient = useQueryClient();
-  const { userId } = useUserId();
+  const { user } = useUser();
 
   const { data } = useQuery({
     queryKey: QUERY_KEY.AUTH.LOGIN,
@@ -72,6 +73,16 @@ const CommentItem = ({
     },
   });
 
+  const handleDeleteClick = async () => {
+    const confirmed = await useModalStore.getState().onOpen("confirm");
+
+    if (confirmed) {
+      deleteCommentMutation();
+    } else {
+      console.log("사용자가 취소하였습니다.");
+    }
+  };
+
   const canReply = depth === 0;
 
   return (
@@ -79,7 +90,7 @@ const CommentItem = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: depth * 0.1 }}
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 space-y-3 ${
+      className={`bg-gray-100 dark:bg-gray-800 rounded-xl shadow p-4 space-y-3 ${
         depth > 0
           ? "ml-6 border-l-2 border-gray-200 dark:border-gray-700 pl-4"
           : ""
@@ -140,7 +151,7 @@ const CommentItem = ({
             </div>
           )}
         </div>
-        {userId && userId === comment.authorId && (
+        {user && user.userId === comment.authorId && (
           <div className="flex items-center gap-4">
             <button
               className="hover:text-green-500 cursor-pointer"
@@ -156,7 +167,7 @@ const CommentItem = ({
             </button>
             <button
               className="hover:text-red-500 cursor-pointer"
-              onClick={() => deleteCommentMutation()}
+              onClick={() => handleDeleteClick()}
             >
               삭제
             </button>

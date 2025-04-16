@@ -1,6 +1,6 @@
 import { AllPosts } from "@/components/home/all-posts";
 import { PopularPosts } from "@/components/home/popular-posts";
-import { getAllPosts } from "@/services/post.service";
+import { getAllPosts, getPopularPosts } from "@/services/post.service";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
@@ -36,10 +36,8 @@ export const Posts = () => {
     isError: isPopularError,
   } = useQuery({
     queryKey: QUERY_KEY.POST.POPULAR,
-    queryFn: () =>
-      getAllPosts(undefined, 6).then((res) =>
-        res.data.data.contents.slice(0, 6)
-      ),
+    queryFn: getPopularPosts,
+    select: (res) => res.data.data,
   });
 
   useEffect(() => {
@@ -50,21 +48,26 @@ export const Posts = () => {
 
   if (isLoading || isPopularLoading) return <PostsLoading />;
 
-  if (isError || isPopularError)
-    return (
-      <div className="container py-8 text-center text-red-500">
-        데이터를 불러오는 중 오류가 발생했습니다.
-      </div>
-    );
   return (
     <div className="container py-8 px-4 mx-auto">
-      {popularPosts && popularPosts.length > 0 && (
-        <PopularPosts posts={popularPosts} />
+      {isPopularError ? (
+        <div className="container py-8 text-center text-red-500">
+          데이터를 불러오는 중 오류가 발생했습니다.
+        </div>
+      ) : (
+        popularPosts &&
+        popularPosts.length > 0 && <PopularPosts posts={popularPosts} />
       )}
-      {data && (
-        <AllPosts
-          posts={data?.pages.flatMap((page) => page.data.data.contents)}
-        />
+      {isError ? (
+        <div className="container py-8 text-center text-red-500">
+          데이터를 불러오는 중 오류가 발생했습니다.
+        </div>
+      ) : (
+        data && (
+          <AllPosts
+            posts={data?.pages.flatMap((page) => page.data.data.contents)}
+          />
+        )
       )}
       <div ref={ref} className="flex justify-center py-6">
         {isFetchingNextPage && <Skeleton className="h-10 w-32 rounded-full" />}

@@ -19,9 +19,9 @@ const BannerCard = ({
   return (
     <figure
       className={cn(
-        "relative h-full w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-        "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-        "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]"
+        "relative h-full w-64 cursor-default overflow-hidden rounded-xl border p-4",
+        "border-gray-950/[.1] bg-gray-950/[.01]",
+        "dark:border-gray-50/[.1] dark:bg-gray-50/[.10]"
       )}
     >
       <div className="flex flex-row items-center gap-2">
@@ -41,12 +41,12 @@ const BannerCard = ({
 export const BannerFeature = () => {
   return (
     <div className="relative hidden w-full flex-col items-center justify-center overflow-hidden sm:flex">
-      <Marquee pauseOnHover className="[--duration:20s]">
+      <Marquee className="[--duration:20s]">
         {firstRow.map((review) => (
           <BannerCard key={review.username} {...review} />
         ))}
       </Marquee>
-      <Marquee reverse pauseOnHover className="[--duration:20s]">
+      <Marquee reverse className="[--duration:20s]">
         {secondRow.map((review) => (
           <BannerCard key={review.username} {...review} />
         ))}

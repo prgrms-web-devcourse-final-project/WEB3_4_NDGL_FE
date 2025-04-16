@@ -56,3 +56,13 @@ export const likeComment = async (commentId: string) => {
     `/like/comments/${commentId}`
   );
 };
+
+export const reportComment = async (
+  commentId: string,
+  payload: { reportType: string; reason: string }
+) => {
+  return await axiosInstance.post<APIResponse>(
+    `/reports/comments/${commentId}`,
+    payload
+  );
+};

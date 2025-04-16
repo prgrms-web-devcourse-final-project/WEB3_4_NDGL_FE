@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -16,141 +14,118 @@ import {
 import { postSchema, PostSchemaType } from "@/schemas/post.schema";
 import { Editor } from "./editor";
 import { useLocationStore } from "@/store/useLocationStore";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createPost, getPost, updatePost } from "@/services/post.service";
-import { CreatePostPayload } from "@/types/post.type";
-import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router";
+import { ImageUpload } from "./image-upload";
+import { useHashtag } from "@/hooks/useHashTag";
+import { useTempPost } from "@/hooks/useTempPost";
+import { usePostMutation } from "@/hooks/usePostMutation";
+import { HashtagInput } from "./hashtag-input";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
+import { getPost } from "@/services/post.service";
+import { useEffect, useMemo } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Trash2 } from "lucide-react";
 
 export const PostEditor = () => {
   const router = useNavigate();
   const [searchParams] = useSearchParams();
-  const postId = searchParams.get("postid") || "";
+
+  const queryClient = useQueryClient();
+
+  const postId = searchParams.get("postid");
   const mode = searchParams.get("mode");
 
   const { locations, setLocations } = useLocationStore();
 
+  const form = useForm<PostSchemaType>({
+    resolver: zodResolver(postSchema),
+    defaultValues: { title: "", content: "", hashtags: [], thumbnail: "" },
+  });
+
+  const {
+    hashtagInput,
+    setHashtagInput,
+    addHashtag,
+    removeHashtag,
+    handleHashtagKeyDown,
+    handleHashtagBlur,
+  } = useHashtag(form);
+
+  const { handleTempLoad, handleTempSave, tempId } = useTempPost({
+    form,
+    setLocations,
+    mode,
+    locations,
+    postId,
+  });
+
   const { data: post } = useQuery({
     queryKey: QUERY_KEY.POST.DETAIL(postId),
     queryFn: () => getPost(postId),
-    enabled: mode === "edit" && postId !== "",
     select: (res) => res.data.data,
+    enabled: !!postId,
   });
 
-  const form = useForm<PostSchemaType>({
-    resolver: zodResolver(postSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-      hashtags: [],
-      thumbnail: "",
+  const { submitPost, isSubmitting } = usePostMutation({
+    mode,
+    postId: postId || (tempId?.toString() ?? ""),
+    locations,
+    onSuccess: () => {
+      setLocations([]);
+      form.reset();
+      router("/");
     },
   });
 
-  const [hashtagInput, setHashtagInput] = useState("");
-
-  const queryClient = useQueryClient();
-
-  const { mutate: create } = useMutation({
-    mutationFn: (payload: CreatePostPayload) =>
-      post && mode === "edit"
-        ? updatePost(post.id.toString(), payload)
-        : createPost(payload),
-    onSuccess: async (data) => {
-      if (data.data.code === 200) {
-        toast.success(
-          mode === "edit"
-            ? "게시글이 업데이트되었습니다."
-            : "게시글이 생성되었습니다."
-        );
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEY.POST.DEFAULT,
-          refetchType: "all",
-        });
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEY.POST.POPULAR,
-          refetchType: "all",
-        });
-        setLocations([]);
-        form.reset();
-        router("/");
-      }
-    },
-    onError: (err) => {
-      console.error(err);
-      toast.error(err.message || "게시글 생성에 실패하였습니다.");
-    },
-  });
-
-  const onSubmit = (data: PostSchemaType) => {
-    if (locations.length === 0) {
-      toast.error("장소를 선택해주세요.");
-      return;
-    }
-
-    create({ ...data, locations });
-  };
-
-  const addHashtag = () => {
-    const value = hashtagInput.trim().replace(/,$/, "");
-    const currentTags = form.getValues("hashtags");
-    if (value && !currentTags.some((tag) => tag.name === value)) {
-      form.setValue("hashtags", [...currentTags, { name: value }]);
-    }
-    setHashtagInput("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      if (!e.nativeEvent.isComposing) {
-        e.preventDefault();
-        addHashtag();
-      }
-    }
-  };
-
-  const handleInputBlur = () => {
-    if (hashtagInput) {
-      addHashtag();
-    }
-  };
-
-  const removeHashtag = (tagName: string) => {
-    form.setValue(
-      "hashtags",
-      form.getValues("hashtags").filter((t) => t.name !== tagName)
-    );
+  const setImageUrl = (imageUrl: string) => {
+    form.setValue("thumbnail", imageUrl);
   };
 
   useEffect(() => {
-    if (mode === "edit" && post) {
+    if (post && mode === "edit") {
       form.reset({
         title: post.title,
         content: post.content,
         hashtags: post.hashtags,
         thumbnail: post.thumbnail,
       });
+
       setLocations(post.locations);
     }
-  }, [post, mode, form, setLocations]);
+  }, [post, mode]);
+
+  useMemo(() => {
+    queryClient.invalidateQueries({
+      queryKey: QUERY_KEY.POST.TEMP,
+      type: "all",
+    });
+  }, []);
 
   return (
     <Card className="mx-auto max-w-4xl shadow-xl">
       <CardHeader>
-        <CardTitle>새 게시글 작성</CardTitle>
+        <CardTitle>
+          {mode === "edit" ? "게시글 수정" : "새 게시글 작성"}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-1 md:px-3 lg:px-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(submitPost)} className="space-y-6">
             <FormField
-              control={form.control}
               name="title"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>제목</FormLabel>
                   <FormControl>
-                    <Input placeholder="제목을 입력하세요" {...field} />
+                    <Input placeholder="제목 입력" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,66 +133,102 @@ export const PostEditor = () => {
             />
 
             <FormField
-              control={form.control}
               name="thumbnail"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>썸네일 URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="썸네일 이미지 URL 입력" {...field} />
-                  </FormControl>
+                  <FormLabel>썸네일 이미지</FormLabel>
+                  {field.value ? (
+                    <div className="relative">
+                      <Trash2
+                        onClick={() => form.setValue("thumbnail", "")}
+                        className="absolute top-0 left-0 cursor-pointer bg-background size-4 text-destructive"
+                      />
+                      <img
+                        src={field.value}
+                        alt="thumbnail"
+                        className="h-32 aspect-video"
+                      />
+                    </div>
+                  ) : (
+                    <ImageUpload
+                      tempId={postId ? +postId : tempId}
+                      setImageUrl={setImageUrl}
+                    />
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormItem>
-              <FormLabel>해시태그</FormLabel>
-              <FormControl>
-                <div>
-                  <Input
-                    placeholder="태그 입력 후 엔터"
-                    value={hashtagInput}
-                    onChange={(e) => setHashtagInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleInputBlur}
-                  />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {form.watch("hashtags").map((tag) => (
-                      <Badge
-                        key={tag.name}
-                        onClick={() => removeHashtag(tag.name)}
-                        className="cursor-pointer"
-                      >
-                        {tag.name} ×
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <HashtagInput
+              hashtagInput={hashtagInput}
+              setHashtagInput={setHashtagInput}
+              hashtags={form.watch("hashtags")}
+              addHashtag={addHashtag}
+              removeHashtag={removeHashtag}
+              onKeyDown={handleHashtagKeyDown}
+              onBlur={handleHashtagBlur}
+            />
 
             <FormField
-              control={form.control}
               name="content"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>내용</FormLabel>
                   <FormControl>
-                    <Editor content={field.value} onChange={field.onChange} />
+                    <Editor
+                      tempId={postId ? +postId : tempId}
+                      content={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              disabled={form.formState.isSubmitting}
-              className="w-full cursor-pointer"
-            >
-              {form.formState.isSubmitting ? "저장 중..." : "게시글 저장"}
-            </Button>
+
+            <div className="flex items-center gap-2">
+              {mode !== "edit" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={isSubmitting}
+                      className="w-1/3 cursor-pointer"
+                      type="button"
+                    >
+                      임시저장 옵션
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={handleTempSave}
+                      className="cursor-pointer"
+                    >
+                      임시저장
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleTempLoad}
+                      className="cursor-pointer"
+                    >
+                      불러오기
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className={cn(
+                  "cursor-pointer",
+                  mode === "edit" ? "w-full" : "w-2/3"
+                )}
+              >
+                {isSubmitting ? "저장 중..." : "게시글 저장"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

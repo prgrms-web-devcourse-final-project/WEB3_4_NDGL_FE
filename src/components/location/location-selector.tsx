@@ -4,6 +4,7 @@ import { useLocationStore } from "@/store/useLocationStore";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { toast } from "sonner";
 
 declare global {
   interface Window {
@@ -87,6 +88,21 @@ export const LocationSelector = () => {
   }, [locations, map]);
 
   const handlePlaceSelect = (place: any) => {
+    const isDuplicate = locations.some(
+      (loc) =>
+        loc.latitude === Number(place.y) && loc.longitude === Number(place.x)
+    );
+    const isMaximum = locations?.length === 20;
+
+    if (isMaximum) {
+      toast.error("장소는 최대 20개만 추가 가능합니다.");
+      return;
+    }
+    if (isDuplicate) {
+      toast.error("이미 추가된 위치입니다.");
+      return;
+    }
+
     addLocation({
       address: place.address_name,
       name: place.place_name,

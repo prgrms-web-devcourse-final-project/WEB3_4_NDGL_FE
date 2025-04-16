@@ -94,13 +94,19 @@ export const Navbar = () => {
                     className="relative w-full text-neutral-600 dark:text-neutral-300"
                   >
                     <AccordionItem value="item-1">
-                      {item.link && (
-                        <AccordionTrigger>
-                          <Link to={item.link}>{item.name}</Link>
-                        </AccordionTrigger>
-                      )}
-                      <AccordionContent>좋아요</AccordionContent>
-                      <AccordionContent>팔로우</AccordionContent>
+                      <AccordionTrigger>{item.name}</AccordionTrigger>
+                      <AccordionContent
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        asChild
+                      >
+                        <Link to="/post?mode=like">좋아요</Link>
+                      </AccordionContent>
+                      <AccordionContent
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        asChild
+                      >
+                        <Link to="/post?mode=follow">팔로우</Link>
+                      </AccordionContent>
                     </AccordionItem>
                   </Accordion>
                 );

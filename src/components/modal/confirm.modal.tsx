@@ -12,10 +12,10 @@ import { Button } from "../ui/button";
 export const ConfirmModal = () => {
   const { open, onClose, type } = useModalStore();
 
-  if (type !== "confirm") return null;
+  const isOpen = open && type === "confirm";
 
   return (
-    <Dialog open={open} onOpenChange={() => onClose(false)}>
+    <Dialog open={isOpen} onOpenChange={() => onClose(false)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>정말 삭제하시겠습니까?</DialogTitle>

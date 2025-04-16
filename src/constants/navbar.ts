@@ -4,7 +4,7 @@ export const navItems = [
     link: "/mypage",
   },
   {
-    name: "내 블로그",
+    name: "블로그",
     link: "/blog",
   },
   {

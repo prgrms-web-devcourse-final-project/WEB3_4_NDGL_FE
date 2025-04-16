@@ -150,11 +150,11 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem className="cursor-pointer">
-                  좋아요
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link to="/post?mode=like">좋아요</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  팔로우
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link to="/post?mode=follow">팔로우</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -17,7 +17,7 @@ export async function loader() {
     return null;
   } catch (error) {
     if (error instanceof AxiosError) {
-      if (error.status === 401) {
+      if (error.status === 401 || (error.status && error.status >= 500)) {
         return redirect("/sign-in");
       }
     }

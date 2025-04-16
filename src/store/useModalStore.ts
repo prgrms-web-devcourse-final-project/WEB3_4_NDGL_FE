@@ -1,11 +1,12 @@
 import { create } from "zustand";
 
-type ModalType = "confirm";
+type ModalType = "confirm" | "report" | "image";
 
 type ModalStoreType = {
   type: ModalType | null;
   open: boolean;
-  onOpen: (type: ModalType) => Promise<boolean>;
+  data: unknown | null;
+  onOpen: (type: ModalType, data?: unknown | null) => Promise<boolean>;
   onClose: (confirmed?: boolean) => void;
   resolve?: (value: boolean) => void;
 };
@@ -14,9 +15,9 @@ export const useModalStore = create<ModalStoreType>((set, get) => ({
   type: null,
   open: false,
   resolve: undefined,
-
-  onOpen: (type) => {
-    set({ type, open: true });
+  data: null,
+  onOpen: (type, data) => {
+    set({ data, type, open: true });
     return new Promise<boolean>((resolve) => {
       set({ resolve });
     });

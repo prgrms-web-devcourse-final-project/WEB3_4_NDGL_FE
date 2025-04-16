@@ -13,7 +13,7 @@ import {
   updateComment,
 } from "@/services/comment.service";
 import { QUERY_KEY } from "@/lib/query-key";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,7 +35,9 @@ const CommentItem = ({
   const [isEditing, setIsEditing] = useState(false);
 
   const queryClient = useQueryClient();
+
   const { user } = useUser();
+  const { onOpen } = useModalStore();
 
   const { data } = useQuery({
     queryKey: QUERY_KEY.AUTH.LOGIN,
@@ -97,9 +99,12 @@ const CommentItem = ({
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-sm text-indigo-600 dark:text-indigo-400">
-          {comment.authorName}
-        </span>
+        <Link
+          to={`/post?mode=user&userid=${comment.authorId}`}
+          className="font-semibold text-sm text-indigo-600 dark:text-indigo-400"
+        >
+          {comment.authorName ?? "삭제된 댓글입니다"}
+        </Link>
         <span className="text-xs text-gray-400">
           {new Date(comment.createdAt).toLocaleString()}
         </span>
@@ -119,19 +124,29 @@ const CommentItem = ({
       )}
       <div className="flex items-center justify-between gap-4 text-xs text-gray-500">
         <div className="flex items-center gap-4">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.1 }}
-            onClick={() => likeCommentMutation()}
-            className={cn(
-              "flex items-center gap-1 text-foreground",
-              data?.isLoggedIn
-                ? "hover:text-red-500 cursor-pointer"
-                : "hover:text-foreground"
-            )}
-          >
-            <Heart size={14} /> {comment.likeCount}
-          </motion.button>
+          {comment.authorId && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.1 }}
+              onClick={() => likeCommentMutation()}
+              className={cn(
+                "flex items-center gap-1 text-foreground",
+                data?.isLoggedIn
+                  ? "hover:text-red-500 cursor-pointer"
+                  : "hover:text-foreground"
+              )}
+            >
+              <Heart
+                size={14}
+                className={
+                  comment.likeStatus
+                    ? "fill-red-500 stroke-red-500"
+                    : "fill-transparent"
+                }
+              />{" "}
+              {comment.likeCount}
+            </motion.button>
+          )}
           {canReply && (
             <div
               className={cn(
@@ -147,32 +162,45 @@ const CommentItem = ({
               }}
             >
               <MessageSquare size={14} /> {comment.replies.length}{" "}
-              {data?.isLoggedIn ? "댓글 달기" : ""}
+              {comment.authorId && data?.isLoggedIn ? "댓글 달기" : ""}
             </div>
           )}
         </div>
-        {user && user.userId === comment.authorId && (
-          <div className="flex items-center gap-4">
-            <button
-              className="hover:text-green-500 cursor-pointer"
-              onClick={() => {
-                if (isEditing) {
-                  setIsEditing(false);
-                } else {
-                  setIsEditing(true);
-                }
-              }}
-            >
-              {isEditing ? "취소" : "수정"}
-            </button>
+        {comment.authorId &&
+          (user && user.userId === comment.authorId ? (
+            <div className="flex items-center gap-4">
+              <button
+                className="hover:text-green-500 cursor-pointer"
+                onClick={() => {
+                  if (isEditing) {
+                    setIsEditing(false);
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+              >
+                {isEditing ? "취소" : "수정"}
+              </button>
+              <button
+                className="hover:text-red-500 cursor-pointer"
+                onClick={() => handleDeleteClick()}
+              >
+                삭제
+              </button>
+            </div>
+          ) : (
             <button
               className="hover:text-red-500 cursor-pointer"
-              onClick={() => handleDeleteClick()}
+              onClick={() =>
+                onOpen("report", {
+                  type: "comment",
+                  commentId: comment.id.toString(),
+                })
+              }
             >
-              삭제
+              신고
             </button>
-          </div>
-        )}
+          ))}
       </div>
       {data?.isLoggedIn && showReplyForm && canReply && (
         <CreateComment parentId={comment.id} />

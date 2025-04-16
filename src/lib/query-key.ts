@@ -7,6 +7,9 @@ const DOMAIN = {
   COMMENT: "comment",
   SEARCH: "search",
   USER: "user",
+  FOLLOW: "follow",
+  BLOG: "blog",
+  TEMP: "temp",
 };
 
 export const QUERY_KEY = {
@@ -17,8 +20,11 @@ export const QUERY_KEY = {
   POST: {
     DEFAULT: [DOMAIN.POST],
     POPULAR: [DOMAIN.POST, DOMAIN.POPULAR],
-    DETAIL: (postId: string) => [DOMAIN.POST, postId],
+    DETAIL: (postId: string | null) => [DOMAIN.POST, postId],
     SEARCH: (query: string) => [DOMAIN.POST, DOMAIN.SEARCH, query],
+    LIST: (mode: string, query?: string) => [DOMAIN.POST, mode, query],
+    MY: [DOMAIN.POST, DOMAIN.USER],
+    TEMP: [DOMAIN.POST, DOMAIN.TEMP],
   },
   COMMENT: {
     DEFAULT: (postId: string, commentId: string) => [
@@ -30,5 +36,9 @@ export const QUERY_KEY = {
   },
   USER: {
     DEFAULT: [DOMAIN.USER],
+    FOLLOW: (userId: string) => [DOMAIN.USER, DOMAIN.FOLLOW, userId],
+  },
+  BLOG: {
+    DEFAULT: [DOMAIN.BLOG],
   },
 };

@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/lib/query-key";
 import { deletePost, getPost, likePost } from "@/services/post.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +17,10 @@ import { useUser } from "@/hooks/useUser";
 import { DotsIcon } from "../ui/icons";
 import { useModalStore } from "@/store/useModalStore";
 import { IMAGE } from "@/constants/img";
-import { follow } from "@/services/user.service";
+import { follow, hasFollow, unFollow } from "@/services/user.service";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { cn } from "@/lib/utils";
 
 const KAKAO_MAP_SCRIPT_ID = "kakao-map-script";
 
@@ -35,6 +36,7 @@ export const Post = () => {
   const queryClient = useQueryClient();
 
   const { user } = useUser();
+  const { onOpen } = useModalStore();
 
   const {
     data: post,
@@ -53,7 +55,23 @@ export const Post = () => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEY.POST.DETAIL(postId),
       });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.LIST("like", ""),
+        type: "all",
+      });
     },
+  });
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const locationsToShow = isExpanded
+    ? post?.locations
+    : post?.locations.slice(0, 4);
+
+  const { data: isFollowed } = useQuery({
+    queryKey: QUERY_KEY.USER.FOLLOW(post?.authorId?.toString() ?? ""),
+    queryFn: () => hasFollow(post?.authorId?.toString() ?? ""),
+    enabled: !!post?.authorId,
+    select: (res) => res.data.data.isFollowed,
   });
 
   const { mutate: followMutation } = useMutation({
@@ -63,21 +81,41 @@ export const Post = () => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEY.POST.DETAIL(postId),
       });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.LIST("follow", ""),
+        type: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.USER.FOLLOW(post?.authorId?.toString() ?? ""),
+        type: "all",
+      });
     },
     onError: (err: AxiosError) => {
       const errorMessage = (err.response?.data as { message: string }).message;
       toast.error(errorMessage ?? "follow Error,,,");
     },
   });
-  // const { mutate: unFollowMutation } = useMutation({
-  //   mutationFn: () => unFollow(user?.userId.toString() ?? ""),
-  //   onSuccess: () => {
-  //     toast.success("언팔로우 성공");
-  //     queryClient.invalidateQueries({
-  //       queryKey: QUERY_KEY.POST.DETAIL(postId),
-  //     });
-  //   },
-  // });
+  const { mutate: unFollowMutation } = useMutation({
+    mutationFn: (userId: string) => unFollow(userId),
+    onSuccess: () => {
+      toast.success("언팔로우 성공");
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.DETAIL(postId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.POST.LIST("follow", ""),
+        type: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEY.USER.FOLLOW(post?.authorId?.toString() ?? ""),
+        type: "all",
+      });
+    },
+    onError: (err: AxiosError) => {
+      const errorMessage = (err.response?.data as { message: string }).message;
+      toast.error(errorMessage ?? "follow Error,,,");
+    },
+  });
 
   const { mutate: deletePostMutation } = useMutation({
     mutationFn: () => deletePost(postId),
@@ -205,11 +243,11 @@ export const Post = () => {
             {post.title}
           </h1>
           <div className="w-full flex items-center justify-between">
-            <div className="flex gap-3 mt-3">
+            <div className="flex gap-3 mt-3 w-1/2 overflow-x-auto pb-2 scrollbar-hide">
               {post.hashtags.map((tag) => (
                 <span
                   key={tag.name}
-                  className="px-3 py-1 bg-indigo-600/90 rounded-full text-sm text-white shadow"
+                  className="whitespace-nowrap px-3 py-1 bg-indigo-600/90 rounded-full text-sm text-white shadow"
                 >
                   #{tag.name}
                 </span>
@@ -222,7 +260,12 @@ export const Post = () => {
                 className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 rounded-full py-2 px-4 shadow backdrop-blur-sm cursor-pointer"
                 onClick={handleLike}
               >
-                <Heart className="w-5 h-5 text-red-500" />
+                <Heart
+                  className={cn(
+                    "w-5 h-5 text-red-500",
+                    post.likeStatus ? "fill-red-500" : "fill-transparent"
+                  )}
+                />
                 <span className="font-semibold text-sm">
                   {post.likeCount}{" "}
                   <span className="hidden md:inline">좋아요</span>
@@ -236,6 +279,16 @@ export const Post = () => {
                   />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  {user && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router(`/post?mode=user&userid=${post.authorId}`)
+                      }
+                      className="cursor-pointer"
+                    >
+                      {post.authorName}님 게시글
+                    </DropdownMenuItem>
+                  )}
                   {user && user.userId === post.authorId && (
                     <DropdownMenuItem
                       onClick={() =>
@@ -260,16 +313,31 @@ export const Post = () => {
                   {user && user.userId !== post.authorId && (
                     <DropdownMenuItem
                       onClick={() => {
-                        followMutation(post.authorId.toString());
+                        if (isFollowed) {
+                          unFollowMutation(post.authorId.toString());
+                        } else {
+                          followMutation(post.authorId.toString());
+                        }
                       }}
                       className="cursor-pointer"
                     >
-                      팔로우
+                      {isFollowed ? "언팔로우" : "팔로우"}
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem className="cursor-pointer">
-                    신고
-                  </DropdownMenuItem>
+                  {user && user.userId !== post.authorId && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onOpen("report", {
+                          type: "post",
+                          postId: post.id.toString(),
+                        });
+                      }}
+                      className="cursor-pointer"
+                    >
+                      신고
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -293,18 +361,37 @@ export const Post = () => {
         </div>
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold mb-2">관련 위치들</h2>
-          {post.locations.map((loc, idx) => (
-            <motion.div
-              key={loc.sequence}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="p-4 bg-blue-50 dark:bg-gray-800 rounded-xl shadow"
+          {locationsToShow &&
+            locationsToShow.map((loc, idx) => (
+              <motion.div
+                key={loc.sequence}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="p-4 bg-blue-50 dark:bg-gray-800 rounded-xl shadow"
+              >
+                <h3 className="font-semibold text-lg">{loc.name}</h3>
+                <p className="text-sm text-muted-foreground">{loc.address}</p>
+              </motion.div>
+            ))}
+
+          {post.locations.length > 4 && (
+            <button
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline mt-2"
             >
-              <h3 className="font-semibold text-lg">{loc.name}</h3>
-              <p className="text-sm text-muted-foreground">{loc.address}</p>
-            </motion.div>
-          ))}
+              {isExpanded ? (
+                <>
+                  접기 <ChevronUp className="w-5 h-5" />
+                </>
+              ) : (
+                <>
+                  더 보기 ({post.locations.length - 4}개 더)
+                  <ChevronDown className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </motion.div>

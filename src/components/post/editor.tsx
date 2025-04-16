@@ -45,11 +45,13 @@ import {
   UnderlineIcon,
   StrikethroughIcon,
   CodeIcon,
+  ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import TextStyle from "@tiptap/extension-text-style";
 import { Level } from "@tiptap/extension-heading";
 import { useEffect } from "react";
+import { useModalStore } from "@/store/useModalStore";
 
 const fontSizeMap: { [key: string]: string } = {
   "1": "가장 큼",
@@ -62,9 +64,11 @@ const fontSizeMap: { [key: string]: string } = {
 export const Editor = ({
   content,
   onChange,
+  tempId,
 }: {
   content: string;
   onChange: (html: string) => void;
+  tempId: number | undefined;
 }) => {
   const editor = useEditor({
     immediatelyRender: false,
@@ -102,13 +106,19 @@ export const Editor = ({
     editorProps: {
       attributes: {
         class:
-          "border rounded-md bg-white dark:bg-gray-800 shadow-sm min-h-[300px] p-4 prose dark:prose-invert max-w-full break-words whitespace-pre-wrap",
+          "border rounded-md bg-white dark:bg-gray-800 shadow-sm min-h-[300px] p-2 md:p-4 prose dark:prose-invert max-w-full break-words whitespace-pre-wrap",
       },
     },
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },
   });
+
+  const { onOpen } = useModalStore();
+
+  const addImage = () => {
+    onOpen("image", { tempId, editor });
+  };
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -121,7 +131,7 @@ export const Editor = ({
   const alignment = ["left", "center", "right", "justify"];
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col mx-auto gap-2 w-full max-w-[calc(100vw-2rem)] md:max-w-2xl">
       <div className="flex flex-wrap items-center gap-1 rounded-md border bg-gray-50 p-2 dark:bg-gray-700">
         <Button
           type="button"
@@ -210,6 +220,9 @@ export const Editor = ({
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
           <QuoteIcon />
+        </Button>
+        <Button type="button" variant="ghost" size="icon" onClick={addImage}>
+          <ImageIcon />
         </Button>
 
         <Select
